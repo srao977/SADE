@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sade"
+version = "0.1.0"
+description = "SADE: Self Adaptive Decision Engine V0.1"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "grpcio>=1.66.0",
+  "pydantic>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["sade*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

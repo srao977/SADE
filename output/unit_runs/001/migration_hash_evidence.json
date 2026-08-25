@@ -1,0 +1,322 @@
+﻿[
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\adaptation.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\adaptation.py",
+        "source_sha256":  "50cd69cf8f5d2a92c91e15f8ab1fdfa9b6a398a7f1a3e130a7465987f0fc8f3f",
+        "target_sha256":  "fd8dda323c6bc2fa7d6543747c0479ea87b4fe3312c387563bddeeaefdaee687",
+        "source_non_import_sha256":  "af25367218e6eff159d67ab7b2260c156f3ed46fd94830c0a13c131eb10141e6",
+        "target_non_import_sha256":  "af25367218e6eff159d67ab7b2260c156f3ed46fd94830c0a13c131eb10141e6",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\coherence.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\coherence.py",
+        "source_sha256":  "ce8f2f85bd51eade1f50cc2adc9d7f6a27c3daa76afdf0c399e59f92b55c1229",
+        "target_sha256":  "b71fae6f146d5ac97aa0234e675dcafe50cc69f2db645c00bd4155e5b316f840",
+        "source_non_import_sha256":  "d4b8da21654e549fcdd46cafd791128a03a9d67edf6e81ba940dcf6c2eadff86",
+        "target_non_import_sha256":  "d4b8da21654e549fcdd46cafd791128a03a9d67edf6e81ba940dcf6c2eadff86",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\config.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\config.py",
+        "source_sha256":  "838c083a69d2b528548989b5ed691c350caa76b8271f3e875e86ab4a6aa4baf6",
+        "target_sha256":  "adb703068c94f9ddc28dc2f82c92e366792a140b595a5852f848c7a9894787bc",
+        "source_non_import_sha256":  "143e420c8bcdaf4a13ec4623015a9f7d1c243540b6f30fcd371800b2bb8e8939",
+        "target_non_import_sha256":  "143e420c8bcdaf4a13ec4623015a9f7d1c243540b6f30fcd371800b2bb8e8939",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\forward.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\forward.py",
+        "source_sha256":  "ea2ff54df1f4e480b54e96263c44146fc2ce2106e554204099d689b497b593ac",
+        "target_sha256":  "fb217231b444e491f341d98fd37cb6fa3d305f1bdc4736cd5cb85a64b952dfcf",
+        "source_non_import_sha256":  "607f110d57a20b4209db20a8a5d2295c9914eb0841a127f018bc6604efa5172a",
+        "target_non_import_sha256":  "607f110d57a20b4209db20a8a5d2295c9914eb0841a127f018bc6604efa5172a",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\half_life.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\half_life.py",
+        "source_sha256":  "ce204be01d3ad44a8940a66a71523e86815d37860a39028318974d3951816099",
+        "target_sha256":  "ef305bf0f1911e1565bd5d90ff226d009ff257a63e6ced3f0ab82cfffbacee9e",
+        "source_non_import_sha256":  "34154b9ad9937457a57b0a9db94f0c1b732d6ff434bda3f0b2e37b1ab82912eb",
+        "target_non_import_sha256":  "34154b9ad9937457a57b0a9db94f0c1b732d6ff434bda3f0b2e37b1ab82912eb",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\health.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\health.py",
+        "source_sha256":  "129a58d0e1013cc0f866dda5306fc80ccba90013b31f8dff913d0679f45af957",
+        "target_sha256":  "6780747549b2ed7b4568e48bbd5d3bfd6fd682c346efa8accefbe2a8d7ac8ad6",
+        "source_non_import_sha256":  "35a925bd49836f93741c02f052f59ec971864c57312ca2da5d215de0e6282697",
+        "target_non_import_sha256":  "35a925bd49836f93741c02f052f59ec971864c57312ca2da5d215de0e6282697",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\innovation.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\innovation.py",
+        "source_sha256":  "09b3b931dc3980f5205c36ea611d35851003d7b68ec649c5883183d32440e2c3",
+        "target_sha256":  "c974b80708b69ca36c503fd07716a7930c2cc26fb908cf8d9902e398c1d7740e",
+        "source_non_import_sha256":  "84feb9a292627015956a9a85fc1ce7499deeadb798d76ee4663e5b3133b36277",
+        "target_non_import_sha256":  "84feb9a292627015956a9a85fc1ce7499deeadb798d76ee4663e5b3133b36277",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\kinematics.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\kinematics.py",
+        "source_sha256":  "00083b5a98863f3d5836e82bdcc82f10ded09631e68bf68493d959e4e6999937",
+        "target_sha256":  "200959a1e871a3adf86f689e75e4ef030c7c641535ac16042760a2b7a04adbf1",
+        "source_non_import_sha256":  "b9c72049e622bd0d78542da95baf681489f644944e5b934505d7114c05a4cdc2",
+        "target_non_import_sha256":  "b9c72049e622bd0d78542da95baf681489f644944e5b934505d7114c05a4cdc2",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\model.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\model.py",
+        "source_sha256":  "77cc090643e74d810b5a73e3b35b23c0e67dbcd9efabbdd3553ba87c45bcbacf",
+        "target_sha256":  "b7c54c59dbdd4eb7bc495610c14fc6533b2231e1de7bf6d978abcd1cd6e7e8a4",
+        "source_non_import_sha256":  "8ff75376e8cae18920f8c7bc95c712e9a30f789327d814f310f5e7c34746e1fb",
+        "target_non_import_sha256":  "8ff75376e8cae18920f8c7bc95c712e9a30f789327d814f310f5e7c34746e1fb",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\observations.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\observations.py",
+        "source_sha256":  "ead25c148bf94183e480911e07ac016eb20a65e6f210ab2d0e1814ce862c3846",
+        "target_sha256":  "f81c15bf539238524e9b06a231df5bb8ae23de94569e429f43738ebaf2ae3100",
+        "source_non_import_sha256":  "5e4af9cf83463482d374d4ab309d11cf9f8834185bf53e5cbdeb0351aced8da2",
+        "target_non_import_sha256":  "5e4af9cf83463482d374d4ab309d11cf9f8834185bf53e5cbdeb0351aced8da2",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\outputs.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\outputs.py",
+        "source_sha256":  "739029f458fdf535f932c34fea6a64ee2660b00fc6de6ebd8f2aa3c3da415755",
+        "target_sha256":  "411f91cbbae2abdd8b2dfe1cf7bf578f4643f93d455b4f2325f4015fdc7ca571",
+        "source_non_import_sha256":  "44965d1ca5d128a8c6fc3b57740d51ae1f94119170d21441e3bfc813f0ee49c8",
+        "target_non_import_sha256":  "44965d1ca5d128a8c6fc3b57740d51ae1f94119170d21441e3bfc813f0ee49c8",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\persistence.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\persistence.py",
+        "source_sha256":  "b5ddc9a65b42744d8928d6d74b6f5d55315141201d93e26866ed6b1f7840bce8",
+        "target_sha256":  "89378499697208bc4b85f7fc3ee78d373fe5670edc376f1a11f6da496afafe4f",
+        "source_non_import_sha256":  "c6e62e859c3be8c964eb2c88d37e3f53eea88c467e08ac04b661608f78f91d58",
+        "target_non_import_sha256":  "c6e62e859c3be8c964eb2c88d37e3f53eea88c467e08ac04b661608f78f91d58",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\perturbation.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\perturbation.py",
+        "source_sha256":  "c4ae83f30ca48f8040d329d5217eb3869cbda8535ea1e8de80eaf8fb7a8c202f",
+        "target_sha256":  "f9d172ec14605d1ff758de4def2401bbb196e184aede0fe440a0f7769f3fd460",
+        "source_non_import_sha256":  "e10d2dcf1c08f5b504ca1fd02b83681b68b479b0e4d482cc3189d3c75767d667",
+        "target_non_import_sha256":  "e10d2dcf1c08f5b504ca1fd02b83681b68b479b0e4d482cc3189d3c75767d667",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\reference.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\reference.py",
+        "source_sha256":  "49e6d923d12c8ed1bda2e13c373277154015036e4f457a334712ebb4dcb52fa8",
+        "target_sha256":  "043a3ea35f5e713583667ed6ba7908f76ce49c9b96a646db01bb1f8910c7091c",
+        "source_non_import_sha256":  "ac94a4fefe86d1763d9ec5168be689f9071fb1c9148b53732a68bfbc8a414a02",
+        "target_non_import_sha256":  "ac94a4fefe86d1763d9ec5168be689f9071fb1c9148b53732a68bfbc8a414a02",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\reversal.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\reversal.py",
+        "source_sha256":  "0b484585b3fbff7293844cbc0c03ec38e3400169557a5e9af38a4657bd9bfca6",
+        "target_sha256":  "db61f768b6d126f1e75fd6b1d482fa111f0c375c2c32e970740223bdaba71817",
+        "source_non_import_sha256":  "09175af7e74cb8342b5284cc16872bb7d4af4d23b1cb9e2cf5a83259e8dadb4e",
+        "target_non_import_sha256":  "09175af7e74cb8342b5284cc16872bb7d4af4d23b1cb9e2cf5a83259e8dadb4e",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\snapshot.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\snapshot.py",
+        "source_sha256":  "fff517e154139f6a7cdf420fbbd049db141bf7d6a192056736b92591d090ca6f",
+        "target_sha256":  "d5dc7b1d4ebd4e240e14c5e4d27274ef7fd5ef41795b51a82781433f8780f31d",
+        "source_non_import_sha256":  "60e68a3d9d94893d377365841754bd398bc74793366da301ce455a8d7fce920f",
+        "target_non_import_sha256":  "60e68a3d9d94893d377365841754bd398bc74793366da301ce455a8d7fce920f",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\state.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\state.py",
+        "source_sha256":  "520b5404aef7624bfce8742023d31f82758cba97320a9f958b7a9abafe8dae3b",
+        "target_sha256":  "88a8cd21f98e60d077ee141a1e0932194a165b8b4410633d66037d484fc77ad4",
+        "source_non_import_sha256":  "ccc2ea8972b8ef60d30d87976272c0b6af789a75e04fe34b5f929d47ac771603",
+        "target_non_import_sha256":  "ccc2ea8972b8ef60d30d87976272c0b6af789a75e04fe34b5f929d47ac771603",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\strength.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\strength.py",
+        "source_sha256":  "f34c9711a353be54c90ac1690a1ec1d76f0d73680f23b631009b2993cf5e4ea7",
+        "target_sha256":  "acb915d2f7a4f032cc8a500c3287d7fbf72635ef47d97603688974c96e045bc0",
+        "source_non_import_sha256":  "3f98abc2d88ec0caec9719fbe5e4bc43a4d2702716928b439d51f9db56e8d49e",
+        "target_non_import_sha256":  "3f98abc2d88ec0caec9719fbe5e4bc43a4d2702716928b439d51f9db56e8d49e",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\trace.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\trace.py",
+        "source_sha256":  "9584525d3ea25bff8bd029e08769f86348abf0735c5a05e7096b474deb7b8820",
+        "target_sha256":  "548dcdb087b2059ab5405f688dd496d55af94f2e798082da7c1d9247cbf13ab4",
+        "source_non_import_sha256":  "7a20c0f3a4570bbc019a98fa40885bd4e63b03d6a2b9e91b5c28ba8725a56a20",
+        "target_non_import_sha256":  "7a20c0f3a4570bbc019a98fa40885bd4e63b03d6a2b9e91b5c28ba8725a56a20",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\uncertainty.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\uncertainty.py",
+        "source_sha256":  "8613c5429d2d2faf1d07f4915700fa7bed8548515c6af95b5d1164f0f458af99",
+        "target_sha256":  "dc256f0ba903e8910c17de5bf7451308a458526a1754fe0768f48d99675e1fb1",
+        "source_non_import_sha256":  "297f31b3ff71ff2409946abcfe04ac5d8c5ff5b67956dcca525d3fc4e4c8ceeb",
+        "target_non_import_sha256":  "297f31b3ff71ff2409946abcfe04ac5d8c5ff5b67956dcca525d3fc4e4c8ceeb",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\volume.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\volume.py",
+        "source_sha256":  "e14a6aa97a4dd89f6335b739a6afc41ef1acb0bcfbc123d7324035356da57c8b",
+        "target_sha256":  "424b3c38efd2d61890e740cbec8a84bbafb7a24168ddfd0069b159b50992d5aa",
+        "source_non_import_sha256":  "38f3cf80e218ba3a04a6ba4e4903304a66c8079d4556605a7b0260a96d3b90ed",
+        "target_non_import_sha256":  "38f3cf80e218ba3a04a6ba4e4903304a66c8079d4556605a7b0260a96d3b90ed",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D01_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d01_adaptive_parametric_model\\src\\d01\\v02\\__init__.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d01\\v02\\__init__.py",
+        "source_sha256":  "5329ef480eb7f9af93083f63e10eb95324a1a5e43555809e356b5fdfc9f3c8e2",
+        "target_sha256":  "c1e1b29898ece1ba69e8aaabb1a75b76d4329c77b0e3483af5b533bfa06795bf",
+        "source_non_import_sha256":  "64229914f7ce4e057570c643d1c11dde22d0e470c70a2099eabe1b7ecc49d4f9",
+        "target_non_import_sha256":  "64229914f7ce4e057570c643d1c11dde22d0e470c70a2099eabe1b7ecc49d4f9",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D02_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d02_return_shape\\src\\d02\\v02\\builder.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d02\\v02\\builder.py",
+        "source_sha256":  "bf290887b5e2e3b1cde552494e7142bf3383dd00199c8e1708eb3ab5598bed5e",
+        "target_sha256":  "59ecd792a5303137189dc6ebe8a8ccb5bc64bc3c2be419a9486f5a000eb0159a",
+        "source_non_import_sha256":  "61e4d04056edf0895275849f412ff618b5728d3203c8128c4328ff2c523d09be",
+        "target_non_import_sha256":  "61e4d04056edf0895275849f412ff618b5728d3203c8128c4328ff2c523d09be",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D02_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d02_return_shape\\src\\d02\\v02\\models.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d02\\v02\\models.py",
+        "source_sha256":  "46257fe809539c49e47f0cd39d03c343e2bd4e54e45d9d832719ce06def2eaa4",
+        "target_sha256":  "158b06c99d477bdd254976180091e57660ef2206e3b772c83f153198bc75c282",
+        "source_non_import_sha256":  "75824a7b307fffcf97dc913727066352da5cd48b1842edcf0e0ea2830e9929fd",
+        "target_non_import_sha256":  "75824a7b307fffcf97dc913727066352da5cd48b1842edcf0e0ea2830e9929fd",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D02_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d02_return_shape\\src\\d02\\v02\\__init__.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d02\\v02\\__init__.py",
+        "source_sha256":  "ac542f51577387a2c5f1a35aeb5e75ef54297998730c2547e428ecd8b5a52bb7",
+        "target_sha256":  "90f47eeaec04bb5ed241e93e7e81731913c22a6104dcca7efacedb7592c220f5",
+        "source_non_import_sha256":  "9ed770798d6a4507c7700f6f19e6ddef4925b704e3c1a428520b4f811a17de5e",
+        "target_non_import_sha256":  "9ed770798d6a4507c7700f6f19e6ddef4925b704e3c1a428520b4f811a17de5e",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D04_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d04_trading_envelope\\src\\aptf_d04\\envelope\\capturability_model.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d04\\envelope\\capturability_model.py",
+        "source_sha256":  "fc9d4a300eabcb3e83b9bccac5a1efeae40b0df09b6cbfa52413601788f01336",
+        "target_sha256":  "404feb878fd5b1e25494908007792ce3616abe68d5ec6a1e595e3f3ea98b4baf",
+        "source_non_import_sha256":  "c8a2aa849832c28486404463bc16727e96237a7f1b2e170e34f262f4f93000c2",
+        "target_non_import_sha256":  "c8a2aa849832c28486404463bc16727e96237a7f1b2e170e34f262f4f93000c2",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D04_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d04_trading_envelope\\src\\aptf_d04\\models\\capturability.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d04\\models\\capturability.py",
+        "source_sha256":  "3f8727ed0a6828e7e2da7bbb3770e22003a7fa7d242c1f7c319c222f766ab2c2",
+        "target_sha256":  "c2c21969747a501cc7ca57155fe215b74fab1f21164c90ec17231e4796522df0",
+        "source_non_import_sha256":  "c4d7ac928254dc2289a43a75981ba86cc6c8a2e1f5c1f4cdcd320a2a83dc1f99",
+        "target_non_import_sha256":  "c4d7ac928254dc2289a43a75981ba86cc6c8a2e1f5c1f4cdcd320a2a83dc1f99",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D04_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d04_trading_envelope\\src\\aptf_d04\\models\\enums.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d04\\models\\enums.py",
+        "source_sha256":  "6dfe44b79db989bf0083c6ef9313568e2292f5be248f02600d693f11dc2eb2d5",
+        "target_sha256":  "05c91a11b9b2ad2e34129b8ddd210b79bcfed9edcbcf7562ca8761229a5e7d55",
+        "source_non_import_sha256":  "016e31caf880619d0c99148d1c739c8d6598619e3321ad7d19aa66a5204fb60a",
+        "target_non_import_sha256":  "016e31caf880619d0c99148d1c739c8d6598619e3321ad7d19aa66a5204fb60a",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "D04_V02",
+        "source":  "C:\\Users\\chino\\APTF\\d04_trading_envelope\\src\\aptf_d04\\models\\envelope_context.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\d04\\models\\envelope_context.py",
+        "source_sha256":  "8d57bb4dca88b6bf7b5b4fa6e960f3fdc4cb46c3988fb53879aa7ab3f9349ff8",
+        "target_sha256":  "174a2b99d37f5c4394b1c36054792e696664de45dafb81d34b5e08923abcde90",
+        "source_non_import_sha256":  "9a231e3708071e35b9c3b1afe24391e885900e253ada42205761e5f60c58ad1f",
+        "target_non_import_sha256":  "9a231e3708071e35b9c3b1afe24391e885900e253ada42205761e5f60c58ad1f",
+        "classification":  "IMPORT_OR_PACKAGING_MODIFIED_ONLY"
+    },
+    {
+        "component":  "ORCH",
+        "source":  "C:\\Users\\chino\\APTF\\aptf_runtime\\src\\aptf_runtime\\emitter.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\adaptive_emitter\\emitter.py",
+        "source_sha256":  "7f329afe697898903f96bb5eac7452cef108e009f0aeace96dc1f88c9c407f36",
+        "target_sha256":  "f1b5f6f3388f7dde27b724f563616fb0b7297c366fea7c462085cdba82a86fd9",
+        "source_non_import_sha256":  "951a22108fad8d9b23a273df7caa758adb68a4b36f590c52a1bc64a467509eb8",
+        "target_non_import_sha256":  "dba3d4398a6a905bd437fea330420b4d5375c582e34c50154cb14d73630b6713",
+        "classification":  "CONTENT_MODIFIED"
+    },
+    {
+        "component":  "ORCH",
+        "source":  "C:\\Users\\chino\\APTF\\adaptive_pipeline\\pipeline.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\adaptive_pipeline\\pipeline.py",
+        "source_sha256":  "f4566cff49d55f45f47442069c314045b4eab11901780190fb833a61fee662b3",
+        "target_sha256":  "f22918a447b55ddc11895bccaf71d35317aad7a0c09544542346f569967b6b97",
+        "source_non_import_sha256":  "f4337856dbdaa53b397d9fbff82e2578799a3db08964f6d1e0f65f71a91f0c40",
+        "target_non_import_sha256":  "aa0624cc979357be64b5e05eae4039f59369e583e9cb529895069841de533df8",
+        "classification":  "CONTENT_MODIFIED"
+    },
+    {
+        "component":  "IO",
+        "source":  "C:\\Users\\chino\\APTF\\integration\\sdx\\sdx_grpc_client.py",
+        "target":  "C:\\Users\\chino\\SADE\\sade\\input\\sdx_client.py",
+        "source_sha256":  "2e0573543526a23833a6bd880138e645805a4d3eea63fe1b1c0291d0b605809c",
+        "target_sha256":  "59bfa0bc6e3b257e8a5587285b3a6fc94ebd0d2d7a8ca76c579ebbaad9a46d50",
+        "source_non_import_sha256":  "b5cbd9f15bdbf5af15fc750f0c7674c44ab990ff8c4b9a0943884cb372d2efa9",
+        "target_non_import_sha256":  "d35241fc674715ce544965a5de4d6c999d6c65e23a34ac5a49a5250454834b8b",
+        "classification":  "CONTENT_MODIFIED"
+    }
+]
