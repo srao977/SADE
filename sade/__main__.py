@@ -38,6 +38,7 @@ import json
 from pathlib import Path
 
 from sade.adaptive_pipeline import AdaptivePipeline, AdaptivePipelineConfig, DEFAULT_UNIT_RUN_OUTPUT_DIR
+from sade.unit_run.run_pricing_001 import run_pricing_unit_001
 
 
 def _parse_args() -> argparse.Namespace:
@@ -51,11 +52,20 @@ def _parse_args() -> argparse.Namespace:
     run.add_argument("--timeout-seconds", type=float, default=60.0)
     run.add_argument("--output-dir", type=Path, default=DEFAULT_UNIT_RUN_OUTPUT_DIR)
 
+    pricing = sub.add_parser("run-pricing-001", help="Run SADE PRICING UNIT RUN 001")
+    pricing.add_argument("--endpoint", default="localhost:50051")
+    pricing.add_argument("--output-dir", type=Path, default=Path("output/unit_runs/pricing_001"))
+
     return parser.parse_args()
 
 
 def main() -> int:
     args = _parse_args()
+    if args.command == "run-pricing-001":
+        summary = run_pricing_unit_001(endpoint=args.endpoint, output_dir=args.output_dir)
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0 if summary.get("status") == "COMPLETE" else 1
+
     if args.command != "run":
         raise RuntimeError("UNSUPPORTED_COMMAND")
 

@@ -11,6 +11,8 @@ requires-python = ">=3.11"
 dependencies = [
   "grpcio>=1.66.0",
   "pydantic>=2.8.0",
+  "numpy>=1.26.0",
+  "scipy>=1.13.0",
 ]
 
 [project.optional-dependencies]
