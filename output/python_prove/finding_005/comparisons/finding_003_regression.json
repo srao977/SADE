@@ -1,0 +1,6 @@
+{
+  "observations": 1000,
+  "pricing_history_bound": 31,
+  "production_retained_latency_samples": 0,
+  "status": "PASS"
+}

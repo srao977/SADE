@@ -30,6 +30,18 @@ Explicit Exclusions / What This Module Does NOT Do:
     - No final execution synthesis
 Failure / Error Behavior:
     Returns nonzero on stream shortfall, processing failures, or independence breaches.
+Event/Source Time:
+    Scientific/provenance timestamp propagated unchanged.
+Receive/Ingress Time:
+    Operational runtime timestamp propagated from AdaptivePipeline.
+Clock:
+    datetime.now(timezone.utc) and time.perf_counter_ns().
+Scientific Mathematics Changed:
+    NO
+Scientific Model Uses Receive Time:
+    NO
+Latency Telemetry:
+    OPERATIONAL ONLY
 """
 
 from __future__ import annotations
@@ -38,6 +50,7 @@ import argparse
 import csv
 import json
 import sys
+import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -117,10 +130,15 @@ def run_pricing_unit_001(
         for vector in stream:
             adaptive_row = adaptive.process_vector(vector)
             pricing_step = pricing.process(adaptive_row)
+            pricing_complete_time_utc = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            ingress_to_pricing_output_elapsed_ns = time.perf_counter_ns() - int(adaptive_row["receive_monotonic_ns"])
 
             record = {
                 "source_row_index": adaptive_row["source_row_index"],
                 "source_timestamp": adaptive_row["source_timestamp"],
+                "receive_time_utc": adaptive_row["receive_time_utc"],
+                "processing_complete_time_utc": pricing_complete_time_utc,
+                "ingress_to_pricing_output_elapsed_ns": ingress_to_pricing_output_elapsed_ns,
                 "entity_id": adaptive_row["entity_id"],
                 "close": adaptive_row["close"],
                 "adaptive_status": adaptive_row["status"],

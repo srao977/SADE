@@ -1,0 +1,38 @@
+{
+  "adaptive_diagnostic_history_sizes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "adaptive_latency": {
+    "all_nonnegative": true,
+    "count": 1000,
+    "maximum_ns": 1037000,
+    "mean_ns": 613142.9,
+    "median_ns": 589200.0,
+    "minimum_ns": 385000,
+    "p50_ns": 589200.0,
+    "p95_ns": 800315.0,
+    "p99_ns": 903101.0
+  },
+  "observations": 1000,
+  "pricing_history_bound": 31,
+  "pricing_history_size": 31,
+  "pricing_latency": {
+    "all_nonnegative": true,
+    "count": 1000,
+    "maximum_ns": 2584100,
+    "mean_ns": 1322047.1,
+    "median_ns": 1312100.0,
+    "minimum_ns": 397000,
+    "p50_ns": 1312100.0,
+    "p95_ns": 1711765.0,
+    "p99_ns": 1913158.9999999993
+  },
+  "production_retained_latency_samples": 0,
+  "receive_time_propagation_failures": 0,
+  "status": "PASS"
+}

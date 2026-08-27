@@ -255,7 +255,14 @@ def test_explicit_capture_preserves_full_finite_run_without_scientific_change(tm
         production_rows = list(csv.DictReader(handle))
     with capture.observations_csv_path.open(newline="", encoding="utf-8") as handle:
         capture_rows = list(csv.DictReader(handle))
-    deterministic_fields = [field for field in production_rows[0] if field != "emission_id"]
+    operational_fields = {
+        "emission_id",
+        "receive_time_utc",
+        "receive_monotonic_ns",
+        "processing_complete_time_utc",
+        "ingress_to_adaptive_output_elapsed_ns",
+    }
+    deterministic_fields = [field for field in production_rows[0] if field not in operational_fields]
     assert all(
         before[field] == after[field]
         for before, after in zip(production_rows, capture_rows, strict=True)

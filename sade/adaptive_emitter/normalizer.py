@@ -27,16 +27,28 @@ Important Assumptions:
 Scientific Provenance:
     Originated from the validated frozen Test 006B adaptive execution lineage.
 Explicit Exclusions / What This Module Does NOT Do:
-    - No synthetic timestamp generation
+    - No source/event timestamp generation
     - No cadence normalization
     - No session inference beyond pass-through placeholder use
 Failure / Error Behavior:
     Returns None when required values cannot be parsed.
+Event/Source Time:
+    Scientific/provenance timestamp parsed from event_timestamp_utc.
+Receive/Ingress Time:
+    Operational runtime timestamp supplied by ingress or captured here for direct calls.
+Clock:
+    datetime.now(timezone.utc) only when the ingress value is absent.
+Scientific Mathematics Changed:
+    NO
+Scientific Model Uses Receive Time:
+    NO
+Latency Telemetry:
+    OPERATIONAL ONLY
 """
 
 from __future__ import annotations
 
-from datetime import datetime as dt
+from datetime import datetime as dt, timezone
 
 from sade.d01.v02.observations import NormalizedObservation
 
@@ -65,7 +77,12 @@ class SourceRowNormalizer:
             event_timestamp_utc = source_row.get("event_timestamp_utc", "")
             parsed_utc = dt.fromisoformat(event_timestamp_utc.replace("Z", "+00:00"))
             event_time = parsed_utc.timestamp()
-            receive_time = event_time
+            receive_timestamp_utc = source_row.get("receive_time_utc")
+            receive_time = (
+                dt.now(timezone.utc)
+                if receive_timestamp_utc is None
+                else dt.fromisoformat(receive_timestamp_utc.replace("Z", "+00:00"))
+            ).timestamp()
 
             close_price = float(source_row.get("close", 0.0))
             volume = float(source_row.get("volume", 0.0))

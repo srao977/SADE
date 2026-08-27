@@ -46,6 +46,16 @@ Scientific State Removed:
     NO
 Scientific Mathematics Changed:
     NO
+Event/Source Time:
+    Scientific/provenance timestamp.
+Receive/Ingress Time:
+    Operational runtime timestamp propagated from AdaptivePipeline.
+Clock:
+    Captured by the ingress caller; not recaptured here.
+Scientific Model Uses Receive Time:
+    NO
+Latency Telemetry:
+    OPERATIONAL ONLY
 Hot-Memory Behavior Changed:
     YES
 """

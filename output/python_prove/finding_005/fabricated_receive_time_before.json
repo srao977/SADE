@@ -1,0 +1,16 @@
+{
+  "status": "DEFECT_PROVEN",
+  "date": "2026-08-27",
+  "implementation_module": "sade.adaptive_emitter.normalizer",
+  "function": "SourceRowNormalizer.source_row_to_normalized_observation",
+  "assignment": "receive_time = event_time",
+  "controlled_input": {
+    "source_timestamp": "2000-01-01T00:00:00Z"
+  },
+  "observed": {
+    "event_time": 946684800.0,
+    "receive_time": 946684800.0,
+    "receive_time_equals_event_time": true
+  },
+  "cause": "implementation assignment, not clock coincidence"
+}

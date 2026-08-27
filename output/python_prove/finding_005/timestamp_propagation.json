@@ -1,0 +1,8 @@
+{
+  "elapsed_nonnegative": true,
+  "receive_time_matches_adaptive_to_pricing": true,
+  "rows": 100,
+  "source_time_preserved": true,
+  "status": "PASS",
+  "wall_clock_order_valid": true
+}

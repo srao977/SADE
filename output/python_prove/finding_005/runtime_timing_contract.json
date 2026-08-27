@@ -1,0 +1,63 @@
+{
+  "event_time": {
+    "classification": "scientific and provenance",
+    "definition": "source observation time supplied by SDX",
+    "field": "source_timestamp/event_timestamp_utc",
+    "preserved": true
+  },
+  "event_time_to_ingress_warning": "For historical replay, receive_time-event_time is replay age, not network latency.",
+  "excluded_scientific_uses": [
+    "D01",
+    "D02",
+    "D04",
+    "Adaptive decision",
+    "causal_quadratic",
+    "fit_f4",
+    "projection",
+    "PriceEngine",
+    "cockpit",
+    "observation_id",
+    "emission_id"
+  ],
+  "future_event_hub_mapping": "Preserve source/event time and Event Hub metadata, then capture an independent SADE_Go ingress time at the future publisher boundary.",
+  "metrics": {
+    "ingress_to_adaptive_output_elapsed_ns": {
+      "clock": "time.perf_counter_ns",
+      "end": "flattened Adaptive output record constructed",
+      "persisted": "per-row external CSV and constant-size run aggregates",
+      "start": "process_vector entry after gRPC iterator yields vector",
+      "unit": "nanoseconds"
+    },
+    "ingress_to_pricing_output_elapsed_ns": {
+      "clock": "time.perf_counter_ns",
+      "end": "PricingPipeline.process returns and integrated record is ready",
+      "persisted": "per-row validation/unit-run CSV",
+      "start": "same Adaptive ingress monotonic tick",
+      "unit": "nanoseconds"
+    }
+  },
+  "propagation": [
+    "source row receives receive_time_utc",
+    "normalizer parses it into NormalizedObservation.receive_time",
+    "Adaptive output row retains the original string",
+    "integrated Pricing artifact retains the original string"
+  ],
+  "receive_monotonic": {
+    "classification": "operational only",
+    "clock": "time.perf_counter_ns",
+    "epoch_meaning": false,
+    "field": "receive_monotonic_ns"
+  },
+  "receive_time": {
+    "capture_count": 1,
+    "capture_function": "AdaptivePipeline.process_vector",
+    "capture_module": "sade.adaptive_pipeline.pipeline",
+    "classification": "operational only",
+    "clock": "datetime.now(timezone.utc)",
+    "definition": "wall-clock time when AdaptivePipeline.process_vector first receives control with the yielded vector",
+    "field": "receive_time_utc",
+    "format": "ISO-8601 UTC with Z and microseconds"
+  },
+  "schema_version": "sade.runtime_timing.v1",
+  "scope_warning": "These metrics do not measure provider, Azure Event Hubs, network, SADE_Go, or production order latency."
+}

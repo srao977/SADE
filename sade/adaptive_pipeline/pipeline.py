@@ -45,6 +45,16 @@ Scientific State Removed:
     NO
 Scientific Mathematics Changed:
     NO
+Event/Source Time:
+    Scientific/provenance timestamp preserved from SDX.
+Receive/Ingress Time:
+    Operational runtime timestamp captured once at process_vector entry.
+Clock:
+    datetime.now(timezone.utc) and time.perf_counter_ns().
+Scientific Model Uses Receive Time:
+    NO
+Latency Telemetry:
+    OPERATIONAL ONLY
 Hot-Memory Behavior Changed:
     YES
 """
@@ -53,6 +63,7 @@ from __future__ import annotations
 
 import csv
 import json
+import time
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -67,6 +78,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_UNIT_RUN_OUTPUT_DIR = ROOT / "output" / "unit_runs" / "001"
 OBSERVATION_FIELDNAMES = (
     "pipeline_observation_number", "source_row_index", "source_timestamp", "entity_id",
+    "receive_time_utc", "receive_monotonic_ns", "processing_complete_time_utc",
+    "ingress_to_adaptive_output_elapsed_ns",
     "open", "high", "low", "close", "volume", "physical_row", "status",
     "observation_id", "emission_id", "source_delta_t_seconds", "decision_rule_path",
     "H", "Q_G", "Q_S", "Q_R", "C", "path_direction", "terminal_displacement",
@@ -88,7 +101,15 @@ def physical_row_from_source_index(source_row_index: int) -> int:
     return int(source_row_index) + 2
 
 
-def build_source_row(vector: Any) -> dict[str, str]:
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _perf_counter_ns() -> int:
+    return time.perf_counter_ns()
+
+
+def build_source_row(vector: Any, receive_time_utc: str | None = None) -> dict[str, str]:
     """Map an SDX MarketVector into adaptive emitter source row shape.
 
     Args:
@@ -117,6 +138,7 @@ def build_source_row(vector: Any) -> dict[str, str]:
     return {
         "entity_id": str(vector.entity_id),
         "event_timestamp_utc": str(vector.source_timestamp),
+        "receive_time_utc": _utc_now_iso() if receive_time_utc is None else receive_time_utc,
         "open": str(vector.open),
         "high": str(vector.high),
         "low": str(vector.low),
@@ -171,6 +193,7 @@ def _build_record(
         "pipeline_observation_number": observation_number,
         "source_row_index": int(vector.source_row_index),
         "source_timestamp": str(vector.source_timestamp),
+        "receive_time_utc": emission.get("receive_time_utc"),
         "entity_id": str(vector.entity_id),
         "open": float(vector.open),
         "high": float(vector.high),
@@ -307,13 +330,16 @@ class AdaptivePipeline:
             Production retains zero rows; run streams each row immediately. Explicit
             retain_records captures full history for a caller-bounded validation run.
         """
+        receive_monotonic_ns = _perf_counter_ns()
+        receive_time_utc = _utc_now_iso()
+
         if self.config.require_strict_row_increment:
             _validate_vector(vector, self.config.entity, self._expected_index)
 
         before_adaptation = self._emitter.adaptation_event_count
         before_feedback = self._emitter.feedback_event_count
 
-        source_row = build_source_row(vector)
+        source_row = build_source_row(vector, receive_time_utc=receive_time_utc)
         physical_row = physical_row_from_source_index(int(vector.source_row_index))
         observation_number = self._expected_index + 1
 
@@ -336,6 +362,11 @@ class AdaptivePipeline:
             adaptation_event_delta=adaptation_delta,
             feedback_event_delta=feedback_delta,
         )
+        processing_complete_time_utc = _utc_now_iso()
+        record["receive_time_utc"] = receive_time_utc
+        record["receive_monotonic_ns"] = receive_monotonic_ns
+        record["processing_complete_time_utc"] = processing_complete_time_utc
+        record["ingress_to_adaptive_output_elapsed_ns"] = _perf_counter_ns() - receive_monotonic_ns
 
         if self.config.retain_records:
             self._rows.append(record)
@@ -382,6 +413,10 @@ class AdaptivePipeline:
             name: [None, None] for name in ("H", "Q_G", "Q_S", "Q_R", "C", "source_delta_t_seconds")
         }
         irregular_source_time_gap_count = 0
+        latency_count = 0
+        latency_total_ns = 0
+        latency_min_ns: int | None = None
+        latency_max_ns: int | None = None
 
         first_actionable: int | None = None
 
@@ -412,6 +447,12 @@ class AdaptivePipeline:
                         float(row["source_delta_t_seconds"]) - 60.0
                     ) > 1e-9:
                         irregular_source_time_gap_count += 1
+
+                    elapsed_ns = int(row["ingress_to_adaptive_output_elapsed_ns"])
+                    latency_count += 1
+                    latency_total_ns += elapsed_ns
+                    latency_min_ns = elapsed_ns if latency_min_ns is None else min(latency_min_ns, elapsed_ns)
+                    latency_max_ns = elapsed_ns if latency_max_ns is None else max(latency_max_ns, elapsed_ns)
 
                     if status == "ACTIONABLE" and first_actionable is None:
                         first_actionable = int(row["pipeline_observation_number"])
@@ -460,6 +501,10 @@ class AdaptivePipeline:
             "source_delta_t_seconds_min": metric_bounds["source_delta_t_seconds"][0],
             "source_delta_t_seconds_max": metric_bounds["source_delta_t_seconds"][1],
             "irregular_source_time_gap_count": irregular_source_time_gap_count,
+            "ingress_to_adaptive_output_elapsed_ns_count": latency_count,
+            "ingress_to_adaptive_output_elapsed_ns_min": latency_min_ns,
+            "ingress_to_adaptive_output_elapsed_ns_max": latency_max_ns,
+            "ingress_to_adaptive_output_elapsed_ns_mean": None if latency_count == 0 else latency_total_ns / latency_count,
             "adaptation_event_count": self._emitter.adaptation_event_count,
             "feedback_event_count": self._emitter.feedback_event_count,
             "source_timestamp_preserved": True,

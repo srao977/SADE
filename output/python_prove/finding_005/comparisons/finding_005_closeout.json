@@ -1,0 +1,23 @@
+{
+  "integrity": {
+    "emission_id_generation_modified": false,
+    "event_hub_code_created": false,
+    "fabricated_receive_time_equals_event_time_removed": true,
+    "finding_001_modified": false,
+    "finding_002_modified": false,
+    "finding_003_retention_regressed": false,
+    "finding_004_f4_contract_modified": false,
+    "go_code_created": false,
+    "observation_id_generation_modified": false,
+    "package_tests_after": 37,
+    "package_tests_before": 31,
+    "sade_go_implemented": false,
+    "scientific_mathematics_modified": false,
+    "sdx_modified": false,
+    "source_event_time_semantics_modified": false,
+    "status": "PASS",
+    "true_receive_time_added": true,
+    "unbounded_telemetry_added": false
+  },
+  "status": "RESOLVED - RUNTIME LATENCY NOW MEASURABLE"
+}

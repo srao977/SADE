@@ -1,0 +1,44 @@
+{
+  "expected_operational_differences": [
+    "ingress_to_pricing_output_elapsed_ns",
+    "processing_complete_time_utc",
+    "receive_time_utc"
+  ],
+  "migration_equivalence_exact": true,
+  "rows_after": 100,
+  "rows_before": 100,
+  "scientific_field_mismatch_counts": {
+    "adaptive_position_decision": 0,
+    "adaptive_status": 0,
+    "close": 0,
+    "domain_exit": 0,
+    "entity_id": 0,
+    "price_cockpit_output": 0,
+    "pricing_color": 0,
+    "pricing_confidence": 0,
+    "pricing_emitted": 0,
+    "pricing_phase": 0,
+    "pricing_status": 0,
+    "rk_success": 0,
+    "source_row_index": 0,
+    "source_timestamp": 0
+  },
+  "scientific_fields_compared": [
+    "source_row_index",
+    "source_timestamp",
+    "entity_id",
+    "close",
+    "adaptive_status",
+    "adaptive_position_decision",
+    "pricing_status",
+    "pricing_emitted",
+    "pricing_color",
+    "pricing_phase",
+    "pricing_confidence",
+    "rk_success",
+    "domain_exit",
+    "price_cockpit_output"
+  ],
+  "status": "PASS",
+  "summary_scientific_fields_exact": true
+}

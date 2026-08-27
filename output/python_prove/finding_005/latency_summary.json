@@ -1,0 +1,36 @@
+{
+  "adaptive": {
+    "all_nonnegative": true,
+    "count": 100,
+    "maximum_ns": 862800,
+    "mean_ns": 609700.0,
+    "median_ns": 595000.0,
+    "minimum_ns": 401300,
+    "p50_ns": 595000.0,
+    "p95_ns": 738200.0,
+    "p99_ns": 859038.0
+  },
+  "instrumentation_overhead": {
+    "all_nonnegative": true,
+    "count": 10000,
+    "maximum_ns": 6200,
+    "mean_ns": 73.68,
+    "measurement": "three perf_counter_ns calls and Python list append",
+    "median_ns": 100.0,
+    "minimum_ns": 0,
+    "p50_ns": 100.0,
+    "p95_ns": 100.0,
+    "p99_ns": 100.0
+  },
+  "pricing": {
+    "all_nonnegative": true,
+    "count": 100,
+    "maximum_ns": 2065800,
+    "mean_ns": 1067561.0,
+    "median_ns": 1272450.0,
+    "minimum_ns": 424700,
+    "p50_ns": 1272450.0,
+    "p95_ns": 1599645.0,
+    "p99_ns": 1785333.0000000014
+  }
+}
