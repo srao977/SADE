@@ -1,4 +1,46 @@
-﻿from __future__ import annotations
+﻿"""
+Module/File Name: sade/d01/v02/model.py
+Date Created / Modified: August 27, 2026
+Purpose:
+    Execute the D01 V0.2 recursive scientific model for one observation at a time.
+Executive Overview:
+    Preserves the Markovian D01 equations while preventing diagnostic trace records
+    from accumulating in production hot memory.
+Role in SADE:
+    Core D01 scientific state transition and DMO/FMO generation.
+Inputs:
+    NormalizedObservation values.
+Outputs:
+    DMOOutput and FMOOutput values; optional diagnostic TraceRecord capture.
+Parameters / Configuration:
+    D01V02Config and explicit retain_diagnostics switch.
+Persistent State:
+    RuntimeState, trace count, and optional caller-bounded diagnostic trace history.
+External Dependencies:
+    Python standard library and sade.d01.v02 scientific modules.
+Main Callers / Consumers:
+    sade.adaptive_emitter.emitter.AdaptiveEmitter.
+Important Assumptions:
+    D01 is a single-stream recursive model; trace history does not feed equations.
+Scientific Provenance:
+    Existing SADE D01 V0.2 implementation; equations and operation order unchanged.
+Explicit Exclusions / What This Module Does NOT Do:
+    No D02, D04, adaptive decision, Pricing, ingress, or ID generation changes.
+Failure / Error Behavior:
+    Existing scientific validation and numerical failures propagate unchanged.
+Previous Retention:
+    Every TraceRecord for the process lifetime.
+New Retention:
+    Production retains a scalar count only; full trace history is explicit opt-in.
+Scientific State Removed:
+    NO
+Scientific Mathematics Changed:
+    NO
+Hot-Memory Behavior Changed:
+    YES
+"""
+
+from __future__ import annotations
 
 import hashlib
 import json
@@ -30,7 +72,36 @@ from sade.d01.v02.volume import update_volume_influence
 
 
 class D01V02Model:
-    def __init__(self, entity_id: str, config: D01V02Config | None = None) -> None:
+    """Own bounded D01 scientific state and optional diagnostic trace capture.
+
+    Purpose:
+        Apply unchanged recursive D01 mathematics to causally ordered observations.
+    Arguments / Inputs:
+        Entity identity, optional scientific config, and explicit diagnostic retention.
+    Returns / Outputs:
+        Model instance; step returns DMO/FMO outputs.
+    Persistent State Changes:
+        Step advances RuntimeState and increments trace_count.
+    Side Effects:
+        Full TraceRecord capture occurs only when retain_diagnostics is true.
+    Assumptions:
+        One instance processes one ordered entity stream.
+    Failure / Error Behavior:
+        Existing causal and health checks raise unchanged errors.
+    Scientific Meaning:
+        D01 recursive state is authoritative; trace history is observability only.
+    Retention Semantics:
+        Maximum production trace history is zero. Explicit validation mode may retain
+        full history for a caller-bounded run; retained traces never affect science.
+    """
+
+    def __init__(
+        self,
+        entity_id: str,
+        config: D01V02Config | None = None,
+        *,
+        retain_diagnostics: bool = False,
+    ) -> None:
         self.config = config or D01V02Config()
         self.config_hash = self.config.sha256()
         self.state = RuntimeState(entity_id=entity_id)
@@ -38,6 +109,8 @@ class D01V02Model:
             observation_half_life=self.config.half_life.baseline,
             forward_half_life=self.config.half_life.baseline,
         )
+        self.retain_diagnostics = retain_diagnostics
+        self.trace_count = 0
         self.trace_records: list[TraceRecord] = []
 
     def _state_hash(self) -> str:
@@ -57,6 +130,29 @@ class D01V02Model:
         return hashlib.sha256(raw).hexdigest().upper()
 
     def step(self, observation: NormalizedObservation) -> tuple[DMOOutput, FMOOutput]:
+        """Advance the recursive D01 model by one observation.
+
+        Purpose:
+            Apply the existing ordered D01 equations and produce DMO/FMO outputs.
+        Arguments / Inputs:
+            One normalized causal observation.
+        Returns / Outputs:
+            Tuple containing the current DMOOutput and FMOOutput.
+        Persistent State Changes:
+            Advances bounded RuntimeState and increments trace_count.
+        Side Effects:
+            Captures a TraceRecord only in explicit diagnostic mode.
+        Assumptions:
+            Observations belong to one entity and arrive in causal order.
+        Failure / Error Behavior:
+            Existing sequence, health, and numerical validation errors propagate.
+        Scientific Meaning:
+            Authoritative D01 recursive state transition; equations are unchanged.
+        Retention Semantics:
+            RuntimeState contains all future-dependent state. Trace history has zero
+            production retention, is optionally capturable, and never feeds a later step.
+        """
+
         obs = observation.with_defaults()
 
         # 1. Validate observation and causal sequence.
@@ -329,9 +425,8 @@ class D01V02Model:
             samples=samples,
         )
 
-        # 21. Persist trace/snapshot metadata.
-        self.trace_records.append(
-            TraceRecord(
+        # 21. Count trace metadata and capture it only in explicit diagnostic mode.
+        trace_record = TraceRecord(
                 trace_id=trace_id,
                 model_time=self.state.model_time,
                 sequence=self.state.sequence,
@@ -353,8 +448,10 @@ class D01V02Model:
                 reversal_propensity=reversal,
                 observation_half_life=obs_hl,
                 forward_half_life=fwd_hl,
-            )
         )
+        self.trace_count += 1
+        if self.retain_diagnostics:
+            self.trace_records.append(trace_record)
 
         # 22. Return versioned output.
         return dmo, fmo

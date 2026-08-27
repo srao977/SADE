@@ -1,0 +1,16 @@
+{
+  "collections": [
+    {"name": "AdaptiveEmitter.emissions", "before_100": 85, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "aggregate counter; explicit diagnostic capture only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "AdaptiveEmitter.initialization", "before_100": 15, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "aggregate counter; explicit diagnostic capture only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "AdaptiveEmitter.adaptation_audit", "before_100": 331, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "aggregate counter; explicit diagnostic capture only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "AdaptiveEmitter.feedback_audit", "before_100": 170, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "aggregate counter; explicit diagnostic capture only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "D01V02Model.trace_records", "before_100": 100, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "aggregate counter; explicit diagnostic capture only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "AdaptivePipeline._rows", "before_100": 100, "after_100": 0, "long_run_final": 0, "justified_maximum": 0, "policy": "stream CSV; explicit record capture only", "scientific_output_affected": false, "status": "EXTERNALIZED"},
+    {"name": "PricingPipeline price/time/OHLCV history", "before_100": 100, "after_100": 31, "long_run_final": 31, "justified_maximum": 31, "policy": "max(derivative_window,f4_window)+1", "scientific_output_affected": false, "status": "BOUNDED"},
+    {"name": "PricingPipeline p1/p2/jp history", "before_100": 100, "after_100": 31, "long_run_final": 31, "justified_maximum": 31, "policy": "max(derivative_window,f4_window)+1", "scientific_output_affected": false, "status": "BOUNDED"},
+    {"name": "PricingPipeline._source_row_index", "before_100": 100, "after_100": 1, "long_run_final": 1, "justified_maximum": 1, "policy": "latest scalar only", "scientific_output_affected": false, "status": "CONSTANT"},
+    {"name": "AdaptivePipeline.run metric value histories", "before_100": 599, "after_100": 13, "long_run_final": 13, "justified_maximum": 13, "policy": "six min/max pairs plus irregular-gap counter", "scientific_output_affected": false, "status": "CONSTANT"}
+  ],
+  "growth_pattern_before": "linear in processed observations except initialization phase",
+  "status": "PASS"
+}

@@ -1,11 +1,11 @@
 """
 Module/File Name: tests/test_sade_pipeline.py
-Date Created / Migrated: August 25, 2026
+Date Created / Modified: August 27, 2026
 Purpose:
     Validate SADE adaptive pipeline behavior and independence constraints.
 Executive Overview:
     Focused tests verify mapping, ordering, failure propagation, serialization,
-    and that core SADE imports resolve from SADE paths.
+    bounded production diagnostics, explicit capture, and SADE-owned imports.
 Role in SADE:
     Code-level package test suite for V0.1.
 Inputs:
@@ -33,12 +33,15 @@ Failure / Error Behavior:
 
 from __future__ import annotations
 
+import csv
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from sade.adaptive_pipeline.pipeline import AdaptivePipeline, AdaptivePipelineConfig, build_source_row, physical_row_from_source_index
+from sade.adaptive_emitter import AdaptiveEmitter
 
 
 class FakeClient:
@@ -59,6 +62,8 @@ class FakeEmitter:
     def __init__(self, fail: bool = False):
         self.adaptation_audit = []
         self.feedback_audit = []
+        self.adaptation_event_count = 0
+        self.feedback_event_count = 0
         self.calls = 0
         self.fail = fail
 
@@ -68,7 +73,9 @@ class FakeEmitter:
             raise RuntimeError("synthetic failure")
         self.calls += 1
         self.adaptation_audit.append({"n": self.calls})
+        self.adaptation_event_count += 1
         self.feedback_audit.extend([{"n": self.calls, "k": "decision"}, {"n": self.calls, "k": "state"}])
+        self.feedback_event_count += 2
         status = "INITIALIZING" if self.calls <= 2 else "ACTIONABLE"
         decision = None if status == "INITIALIZING" else "HOLD"
         return {
@@ -111,6 +118,17 @@ def _vector(index: int, entity: str = "AAPL", ts: str | None = None):
         close=100.5 + index,
         volume=1000 + index,
     )
+
+
+def _vectors(count: int) -> list[SimpleNamespace]:
+    start = datetime(2026, 8, 27, 13, 30, tzinfo=timezone.utc)
+    return [
+        _vector(
+            index,
+            ts=(start + timedelta(minutes=index)).isoformat().replace("+00:00", "Z"),
+        )
+        for index in range(count)
+    ]
 
 
 def test_package_import_path_is_sade_owned() -> None:
@@ -192,3 +210,60 @@ def test_emitter_failure_is_explicit() -> None:
     )
     with pytest.raises(RuntimeError, match="ADAPTIVE_PROCESSING_FAILURE"):
         pipeline.process_vector(_vector(0))
+
+
+def test_production_diagnostics_and_output_history_remain_empty(tmp_path: Path) -> None:
+    pipeline = AdaptivePipeline(
+        AdaptivePipelineConfig(max_vectors=180, output_dir=tmp_path),
+        client=FakeClient(_vectors(180)),
+    )
+
+    summary = pipeline.run()
+    emitter = pipeline._emitter
+    assert summary["status"] == "COMPLETE"
+    assert summary["adaptation_event_count"] == emitter.adaptation_event_count
+    assert summary["feedback_event_count"] == emitter.feedback_event_count
+    assert emitter.emission_count == 165
+    assert emitter.initialization_count == 15
+    assert emitter.emissions == []
+    assert emitter.initialization == []
+    assert emitter.adaptation_audit == []
+    assert emitter.feedback_audit == []
+    assert emitter.d01.trace_count == 180
+    assert emitter.d01.trace_records == []
+    assert pipeline._rows == []
+    with pipeline.observations_csv_path.open(newline="", encoding="utf-8") as handle:
+        assert sum(1 for _row in csv.DictReader(handle)) == 180
+
+
+def test_explicit_capture_preserves_full_finite_run_without_scientific_change(tmp_path: Path) -> None:
+    vectors = _vectors(40)
+    production = AdaptivePipeline(
+        AdaptivePipelineConfig(max_vectors=40, output_dir=tmp_path / "production"),
+        client=FakeClient(vectors),
+    )
+    capture_emitter = AdaptiveEmitter("AAPL", "rule", "code", retain_diagnostics=True)
+    capture = AdaptivePipeline(
+        AdaptivePipelineConfig(max_vectors=40, output_dir=tmp_path / "capture", retain_records=True),
+        client=FakeClient(vectors),
+        emitter=capture_emitter,
+    )
+
+    production.run()
+    capture.run()
+    with production.observations_csv_path.open(newline="", encoding="utf-8") as handle:
+        production_rows = list(csv.DictReader(handle))
+    with capture.observations_csv_path.open(newline="", encoding="utf-8") as handle:
+        capture_rows = list(csv.DictReader(handle))
+    deterministic_fields = [field for field in production_rows[0] if field != "emission_id"]
+    assert all(
+        before[field] == after[field]
+        for before, after in zip(production_rows, capture_rows, strict=True)
+        for field in deterministic_fields
+    )
+    assert len(capture._rows) == 40
+    assert len(capture_emitter.initialization) == capture_emitter.initialization_count == 15
+    assert len(capture_emitter.emissions) == capture_emitter.emission_count == 25
+    assert len(capture_emitter.adaptation_audit) == capture_emitter.adaptation_event_count
+    assert len(capture_emitter.feedback_audit) == capture_emitter.feedback_event_count
+    assert len(capture_emitter.d01.trace_records) == capture_emitter.d01.trace_count == 40

@@ -1,11 +1,11 @@
 """
 Module/File Name: sade/pricing_pipeline/derivatives.py
-Date Created / Migrated: August 25, 2026
+Date Created / Modified: August 27, 2026
 Purpose:
-    Provide causal derivative mathematics used by SADE pricing pipeline.
+    Provide reference full-history and production active-index derivative fitting.
 Executive Overview:
-    Implements causal quadratic local fitting to produce p1 and p2 from close
-    history and derivative-state classification helpers.
+    Preserves causal quadratic mathematics while allowing production to fit only
+    the requested active index instead of recomputing historical indices.
 Role in SADE:
     First mathematical stage in pricing_pipeline before F4 and RK45.
 Inputs:
@@ -19,13 +19,21 @@ Persistent State:
 External Dependencies:
     numpy and Python math.
 Main Callers / Consumers:
-    sade.pricing_pipeline.pipeline and tests.
+    PricingPipeline uses causal_quadratic_at_index; tests use both implementations.
 Important Assumptions:
     Input timestamps are already source-preserved and causally ordered.
 Scientific Provenance:
     Migrated without mathematical change from:
     - APTF diagnostics/run_test_009_derivative_analysis.py::causal_quadratic
     - APTF diagnostics/run_test_009_derivative_analysis.py::derivative_state
+Scientific Mathematics Changed:
+    NO
+Computational Scheduling Changed:
+    YES
+Historical Recomputation Removed:
+    YES, from the production Pricing path.
+Finding 001 Analytic Projection Changed:
+    NO
 Explicit Exclusions / What This Module Does NOT Do:
     - No cadence normalization
     - No SDX reads
@@ -93,6 +101,55 @@ def causal_quadratic(
         d1[index] = coefficients[1]
         d2[index] = 2.0 * coefficients[0]
     return d1, d2, failures
+
+
+def causal_quadratic_at_index(
+    times_minutes: np.ndarray,
+    prices: np.ndarray,
+    index: int,
+    window: int = 15,
+) -> tuple[float, float, int]:
+    """Compute the existing causal quadratic fit only at one requested index.
+
+    Purpose:
+        Remove repeated historical regressions from the live Pricing path.
+    Arguments / Inputs:
+        Aligned source times and prices, requested active index, and trailing window.
+    Returns / Outputs:
+        Tuple (p1, p2, failures) for the requested index; unavailable values are NaN.
+    Persistent State Changes:
+        None.
+    Side Effects:
+        None.
+    Assumptions:
+        Arrays are aligned and index identifies the existing causal active row.
+    Failure / Error Behavior:
+        Insufficient/out-of-range history returns NaN values and zero fit failures;
+        numerical/rank/non-finite failure returns NaN values and one failure.
+    Scientific Meaning:
+        The same local quadratic derivative estimate as causal_quadratic[index].
+    Scientific Provenance:
+        Existing full-history causal_quadratic implementation.
+    Scientific Mathematics Changed:
+        NO
+    Reference Algorithm:
+        causal_quadratic full-history implementation.
+    Difference:
+        Computes only the requested active index.
+    """
+
+    if index < window - 1 or index < 0 or index >= len(prices):
+        return math.nan, math.nan, 0
+    x = times_minutes[index - window + 1 : index + 1] - times_minutes[index]
+    y = prices[index - window + 1 : index + 1]
+    design = np.column_stack((x * x, x, np.ones(window)))
+    try:
+        coefficients, _, rank, _ = np.linalg.lstsq(design, y, rcond=None)
+    except np.linalg.LinAlgError:
+        return math.nan, math.nan, 1
+    if rank != 3 or not np.all(np.isfinite(coefficients)):
+        return math.nan, math.nan, 1
+    return float(coefficients[1]), float(2.0 * coefficients[0]), 0
 
 
 def derivative_state(d1: float, d2: float, epsilon: float) -> str:

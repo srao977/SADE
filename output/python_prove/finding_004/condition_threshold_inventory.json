@@ -1,0 +1,22 @@
+{
+  "consumers": [
+    {
+      "categorical_output": "confidence_state",
+      "field": "condition_number",
+      "function": "EmissionPolicy.emit",
+      "module": "sade.pricing_pipeline.price_engine.policy",
+      "operator": "<=",
+      "threshold": 7.835779770603297,
+      "threshold_name": "condition_median"
+    },
+    {
+      "categorical_output": "confidence_state",
+      "field": "condition_number",
+      "function": "EmissionPolicy.emit",
+      "module": "sade.pricing_pipeline.price_engine.policy",
+      "operator": "<=",
+      "threshold": 13.040323846425492,
+      "threshold_name": "condition_q95"
+    }
+  ]
+}

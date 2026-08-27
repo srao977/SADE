@@ -1,0 +1,11 @@
+{
+  "analytic_vs_rk45_status": "PASS",
+  "cockpit_equivalence": true,
+  "domain_exit_agreement": true,
+  "price_emission_equivalence": true,
+  "production_projection": "ANALYTIC_EXPM",
+  "production_rk45_executed": false,
+  "solves_compared": 55,
+  "status": "PASS",
+  "trajectory_points_compared": 605
+}

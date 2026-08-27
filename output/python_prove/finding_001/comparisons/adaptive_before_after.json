@@ -1,0 +1,13 @@
+{
+  "deterministic_observations_exact": true,
+  "emission_id_semantic_validation": "PASS",
+  "excluded_operational_fields": [
+    "generated_at_utc",
+    "output_dir"
+  ],
+  "execution_instance_id_rule": "emission_id bytes are not compared across independent runs",
+  "independence_summary_scientific_fields_exact": true,
+  "observation_id_exact": true,
+  "status": "PASS",
+  "summary_scientific_fields_exact": true
+}

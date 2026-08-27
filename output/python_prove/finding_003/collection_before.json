@@ -1,0 +1,67 @@
+{
+  "checkpoints": {
+    "0": {
+      "AdaptiveEmitter.adaptation_audit": 0,
+      "AdaptiveEmitter.emissions": 0,
+      "AdaptiveEmitter.feedback_audit": 0,
+      "AdaptiveEmitter.initialization": 0,
+      "AdaptivePipeline._rows": 0,
+      "AdaptivePipeline.run_metric_values": 0,
+      "D01V02Model.trace_records": 0,
+      "PricingPipeline._source_row_index": 0,
+      "PricingPipeline.derivative_history": 0,
+      "PricingPipeline.price_time_ohlcv_history": 0
+    },
+    "25": {
+      "AdaptiveEmitter.adaptation_audit": 55,
+      "AdaptiveEmitter.emissions": 10,
+      "AdaptiveEmitter.feedback_audit": 20,
+      "AdaptiveEmitter.initialization": 15,
+      "AdaptivePipeline._rows": 25,
+      "AdaptivePipeline.run_metric_values": 149,
+      "D01V02Model.trace_records": 25,
+      "PricingPipeline._source_row_index": 25,
+      "PricingPipeline.derivative_history": 25,
+      "PricingPipeline.price_time_ohlcv_history": 25
+    },
+    "50": {
+      "AdaptiveEmitter.adaptation_audit": 134,
+      "AdaptiveEmitter.emissions": 35,
+      "AdaptiveEmitter.feedback_audit": 70,
+      "AdaptiveEmitter.initialization": 15,
+      "AdaptivePipeline._rows": 50,
+      "AdaptivePipeline.run_metric_values": 299,
+      "D01V02Model.trace_records": 50,
+      "PricingPipeline._source_row_index": 50,
+      "PricingPipeline.derivative_history": 50,
+      "PricingPipeline.price_time_ohlcv_history": 50
+    },
+    "75": {
+      "AdaptiveEmitter.adaptation_audit": 234,
+      "AdaptiveEmitter.emissions": 60,
+      "AdaptiveEmitter.feedback_audit": 120,
+      "AdaptiveEmitter.initialization": 15,
+      "AdaptivePipeline._rows": 75,
+      "AdaptivePipeline.run_metric_values": 449,
+      "D01V02Model.trace_records": 75,
+      "PricingPipeline._source_row_index": 75,
+      "PricingPipeline.derivative_history": 75,
+      "PricingPipeline.price_time_ohlcv_history": 75
+    },
+    "100": {
+      "AdaptiveEmitter.adaptation_audit": 331,
+      "AdaptiveEmitter.emissions": 85,
+      "AdaptiveEmitter.feedback_audit": 170,
+      "AdaptiveEmitter.initialization": 15,
+      "AdaptivePipeline._rows": 100,
+      "AdaptivePipeline.run_metric_values": 599,
+      "D01V02Model.trace_records": 100,
+      "PricingPipeline._source_row_index": 100,
+      "PricingPipeline.derivative_history": 100,
+      "PricingPipeline.price_time_ohlcv_history": 100
+    }
+  },
+  "observations": 100,
+  "source": "deterministic replay of unchanged-SDX Finding 003 before artifact",
+  "status": "CAPTURED_BEFORE_IMPLEMENTATION"
+}

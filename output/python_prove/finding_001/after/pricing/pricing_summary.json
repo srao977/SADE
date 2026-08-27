@@ -1,0 +1,64 @@
+{
+  "adaptive": {
+    "BUY": 8,
+    "HOLD": 67,
+    "SELL": 10,
+    "actionable": 85,
+    "initializing": 15,
+    "source_timestamp_first": "2022-09-30 04:00:00",
+    "source_timestamp_last": "2022-09-30 06:21:00"
+  },
+  "aptf_files_opened": [],
+  "aptf_files_opened_count": 0,
+  "aptf_modules_loaded": [],
+  "aptf_modules_loaded_count": 0,
+  "cadence_logic_added": false,
+  "entity": "AAPL",
+  "failures": [],
+  "generated_at_utc": "2026-08-27T17:30:36.358342+00:00",
+  "pricing": {
+    "confidence_state_counts": {
+      "LOW": 26,
+      "MEDIUM": 29
+    },
+    "derivative_ready_observations": 85,
+    "domain_exits": 18,
+    "f4_ready_observations": 55,
+    "observations_received": 100,
+    "price_cockpit_outputs": 55,
+    "price_color_counts": {
+      "AMBER": 33,
+      "GREEN": 14,
+      "RED": 8
+    },
+    "price_emissions_generated": 55,
+    "rk45_attempts": 55,
+    "rk45_failures": 0,
+    "rk45_successes": 55,
+    "step_status_counts": {
+      "EMITTED": 55,
+      "WARMUP_DERIVATIVE": 15,
+      "WARMUP_F4": 30
+    },
+    "trajectory_phase_counts": {
+      "DOWN_ACCELERATING": 23,
+      "DOWN_DECELERATING": 6,
+      "NEAR_STATIONARY": 3,
+      "UP_ACCELERATING": 22,
+      "UP_DECELERATING": 1
+    },
+    "turning_tendency_counts": {
+      "DETERIORATING_TOWARD_TURN": 1,
+      "NONE": 46,
+      "PROJECTED_P2_REVERSAL": 3,
+      "RECOVERING_TOWARD_TURN": 5
+    },
+    "warmup_observations": 45
+  },
+  "source_timestamp_preserved": true,
+  "status": "COMPLETE",
+  "timestamp_normalization": false,
+  "unit_run_id": "SADE_PRICING_UNIT_RUN_001",
+  "vectors_received": 100,
+  "vectors_requested": 100
+}

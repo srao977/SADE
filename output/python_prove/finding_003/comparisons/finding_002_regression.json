@@ -1,0 +1,10 @@
+{
+  "active_index_incremental_fitting": "PRESERVED",
+  "causal_quadratic_helper_bit_exact": true,
+  "f4_helper_fields_bit_exact": true,
+  "focused_tests_failed": 0,
+  "focused_tests_passed": 4,
+  "full_history_production_refit": false,
+  "production_rk45_executed": false,
+  "status": "PASS"
+}

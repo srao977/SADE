@@ -1,0 +1,18 @@
+{
+  "emissions_after_observation_100": 900,
+  "final_collections": {
+    "AdaptiveEmitter.adaptation_audit": 0,
+    "AdaptiveEmitter.emissions": 0,
+    "AdaptiveEmitter.feedback_audit": 0,
+    "AdaptiveEmitter.initialization": 0,
+    "AdaptivePipeline._rows": 0,
+    "AdaptivePipeline.run_metric_aggregate_slots": 13,
+    "D01V02Model.trace_records": 0,
+    "PricingPipeline._source_row_index": 1,
+    "PricingPipeline.derivative_history": 31,
+    "PricingPipeline.price_time_ohlcv_history": 31
+  },
+  "observations_processed": 1000,
+  "pricing_history_bound": 31,
+  "status": "PASS"
+}

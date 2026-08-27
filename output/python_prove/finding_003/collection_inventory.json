@@ -1,0 +1,152 @@
+{
+  "additional_collections_discovered": 2,
+  "collections": [
+    {
+      "append_site": "sade/adaptive_emitter/emitter.py:362",
+      "classification": "DIAGNOSTIC / AUDIT HISTORY",
+      "collection": "AdaptiveEmitter.emissions",
+      "current_growth": "one deepcopy per actionable observation",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_emitter/emitter.py",
+      "number": 1,
+      "purpose": "diagnostic archive of actionable emissions",
+      "read_sites": ["sade/adaptive_pipeline/pipeline.py:366 count only"],
+      "required_retention": "RETAIN AGGREGATE COUNTER ONLY; optional external collector"
+    },
+    {
+      "append_site": "sade/adaptive_emitter/emitter.py:364",
+      "classification": "DIAGNOSTIC / AUDIT HISTORY",
+      "collection": "AdaptiveEmitter.initialization",
+      "current_growth": "one deepcopy per initialization observation; phase-limited to CONTEXT_LENGTH=15",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_emitter/emitter.py",
+      "number": 2,
+      "purpose": "diagnostic archive of initialization emissions",
+      "read_sites": ["sade/adaptive_pipeline/pipeline.py:366 count only"],
+      "required_retention": "RETAIN AGGREGATE COUNTER ONLY; optional external collector"
+    },
+    {
+      "append_site": "sade/adaptive_emitter/emitter.py:323",
+      "classification": "DIAGNOSTIC / AUDIT HISTORY",
+      "collection": "AdaptiveEmitter.adaptation_audit",
+      "current_growth": "zero to ten changed-property events per observation after context fills",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_emitter/emitter.py",
+      "number": 3,
+      "purpose": "observability for rolling-property changes",
+      "read_sites": [
+        "sade/adaptive_pipeline/pipeline.py:245 before length",
+        "sade/adaptive_pipeline/pipeline.py:260 per-row delta",
+        "sade/adaptive_pipeline/pipeline.py:366 total count"
+      ],
+      "required_retention": "RETAIN AGGREGATE COUNTER ONLY; optional external collector"
+    },
+    {
+      "append_site": "sade/adaptive_emitter/emitter.py:336",
+      "classification": "DIAGNOSTIC / AUDIT HISTORY",
+      "collection": "AdaptiveEmitter.feedback_audit",
+      "current_growth": "two events per actionable observation",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_emitter/emitter.py",
+      "number": 4,
+      "purpose": "observability for decision and position-state feedback",
+      "read_sites": [
+        "sade/adaptive_pipeline/pipeline.py:246 before length",
+        "sade/adaptive_pipeline/pipeline.py:261 per-row delta",
+        "sade/adaptive_pipeline/pipeline.py:367 total count"
+      ],
+      "required_retention": "RETAIN AGGREGATE COUNTER ONLY; optional external collector"
+    },
+    {
+      "append_site": "sade/d01/v02/model.py:333",
+      "classification": "DIAGNOSTIC / AUDIT HISTORY",
+      "collection": "D01V02Model.trace_records",
+      "current_growth": "one TraceRecord per observation",
+      "future_science_depends_on_history": false,
+      "module": "sade/d01/v02/model.py",
+      "number": 5,
+      "purpose": "forensic D01 state trace",
+      "read_sites": [],
+      "required_retention": "REMOVE FROM HOT STATE; optional external collector"
+    },
+    {
+      "append_site": "sade/adaptive_pipeline/pipeline.py:272",
+      "classification": "OUTPUT HISTORY",
+      "collection": "AdaptivePipeline._rows",
+      "current_growth": "one flattened output row per observation",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_pipeline/pipeline.py",
+      "number": 6,
+      "purpose": "deferred CSV serialization plus first/last timestamp lookup",
+      "read_sites": [
+        "sade/adaptive_pipeline/pipeline.py:361-362 first/last timestamps",
+        "sade/adaptive_pipeline/pipeline.py:385 field names",
+        "sade/adaptive_pipeline/pipeline.py:424 CSV iteration"
+      ],
+      "required_retention": "STREAM TO CSV; retain first/latest timestamps only; optional external collector"
+    },
+    {
+      "append_site": "sade/pricing_pipeline/pipeline.py:276-282",
+      "classification": "SCIENTIFIC ROLLING HISTORY - REQUIRED",
+      "collection": "PricingPipeline price/time/OHLCV history",
+      "current_growth": "eight parallel entries per observation",
+      "future_science_depends_on_history": true,
+      "module": "sade/pricing_pipeline/pipeline.py",
+      "number": 7,
+      "purpose": "causal derivative and F4 windows plus active-row metadata",
+      "read_sites": [
+        "causal_quadratic_at_index trailing derivative_window",
+        "fit_f4_at_index trailing f4_window",
+        "projection/emission active row"
+      ],
+      "required_retention": "RETAIN EXACT BOUNDED WINDOW max(derivative_window, f4_window)+1; default 31"
+    },
+    {
+      "append_site": "sade/pricing_pipeline/pipeline.py:283-285",
+      "classification": "SCIENTIFIC ROLLING HISTORY - REQUIRED",
+      "collection": "PricingPipeline p1/p2/jp derivative history",
+      "current_growth": "three parallel entries per observation",
+      "future_science_depends_on_history": true,
+      "module": "sade/pricing_pipeline/pipeline.py",
+      "number": 8,
+      "purpose": "active-index incremental derivative cache and F4 trailing window",
+      "read_sites": ["fit_f4_at_index trailing f4_window", "projection/emission active row"],
+      "required_retention": "RETAIN EXACT BOUNDED WINDOW max(derivative_window, f4_window)+1; default 31"
+    },
+    {
+      "append_site": "sade/pricing_pipeline/pipeline.py:275",
+      "classification": "RUNTIME STATE - REQUIRED",
+      "collection": "PricingPipeline._source_row_index",
+      "current_growth": "one integer per observation",
+      "future_science_depends_on_history": false,
+      "module": "sade/pricing_pipeline/pipeline.py",
+      "number": 9,
+      "purpose": "strict next-row ordering guard",
+      "read_sites": ["sade/pricing_pipeline/pipeline.py:268 latest value only"],
+      "required_retention": "RETAIN CURRENT/LATEST ONLY"
+    },
+    {
+      "append_site": "sade/adaptive_pipeline/pipeline.py run metric append sites",
+      "classification": "RUNTIME STATE - REQUIRED AGGREGATES",
+      "collection": "AdaptivePipeline.run metric value histories",
+      "current_growth": "H, Q_G, Q_S, Q_R, C, and source delta values retained for configured run",
+      "future_science_depends_on_history": false,
+      "module": "sade/adaptive_pipeline/pipeline.py",
+      "number": 10,
+      "purpose": "summary minima, maxima, and irregular-gap count",
+      "read_sites": ["AdaptivePipeline.run summary construction"],
+      "required_retention": "RETAIN AGGREGATE MIN/MAX AND COUNTER ONLY"
+    }
+  ],
+  "forensic_collection_count": 8,
+  "inventory_status": "CLASSIFIED_BEFORE_IMPLEMENTATION",
+  "pricing_retention_derivation": "At receipt index n, unchanged active_index=n-1. The active fit needs a trailing max(derivative_window,f4_window) window ending at n-1, while index n remains pending; therefore exact retention is max(window)+1.",
+  "production_relevant_collection_count": 10,
+  "reviewed_but_excluded": [
+    "AdaptiveEmitter.context: already scientifically bounded at CONTEXT_LENGTH=15",
+    "run_pricing_001 integrated_rows: validation-only and explicitly capped at 100",
+    "unit-run audit-hook opened_files: validation-only process-local evidence",
+    "projection solved/failed maps: per-call finite temporaries",
+    "summary Counters: bounded by fixed classification cardinality"
+  ]
+}

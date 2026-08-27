@@ -1,0 +1,10 @@
+{
+  "excluded_operational_fields": [
+    "generated_at_utc"
+  ],
+  "full_numerical_equivalence_evidence": "comparisons/downstream_shadow_equivalence.json",
+  "migration_equivalence_exact": true,
+  "observations_csv_exact": true,
+  "status": "PASS",
+  "summary_scientific_fields_exact": true
+}

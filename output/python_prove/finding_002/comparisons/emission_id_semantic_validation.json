@@ -1,0 +1,44 @@
+{
+  "after": {
+    "artifact": "output\\python_prove\\finding_002\\after\\adaptive\\observations.csv",
+    "emission_count": 100,
+    "emission_id_duplicate_count": 0,
+    "emission_id_non_empty_count": 100,
+    "emission_id_unique_count": 100,
+    "observation_id_non_empty_count": 100,
+    "observation_id_unique_count": 100,
+    "result": "PASS",
+    "source_lineage_complete": true
+  },
+  "before": {
+    "artifact": "output\\python_prove\\finding_002\\before\\adaptive\\observations.csv",
+    "emission_count": 100,
+    "emission_id_duplicate_count": 0,
+    "emission_id_non_empty_count": 100,
+    "emission_id_unique_count": 100,
+    "observation_id_non_empty_count": 100,
+    "observation_id_unique_count": 100,
+    "result": "PASS",
+    "source_lineage_complete": true
+  },
+  "classification": {
+    "emission_id": "DERIVED ID FROM EXECUTION-INSTANCE TELEMETRY",
+    "lifecycle and component timing": "EXECUTION-INSTANCE TELEMETRY",
+    "observation_id": "SCIENTIFIC / DETERMINISTIC SOURCE LINEAGE"
+  },
+  "construction_fields": "all emission_core fields",
+  "construction_function": "sade.adaptive_emitter.emitter.AdaptiveEmitter.process",
+  "id_generation_code_changed": false,
+  "status": "PASS",
+  "timing_derived_fields": [
+    "lifecycle_start_ns",
+    "lifecycle_end_ns",
+    "direct_lifecycle_ns",
+    "component_lifecycle_ns.SOURCE_ADMISSION",
+    "component_lifecycle_ns.D01",
+    "component_lifecycle_ns.D02",
+    "component_lifecycle_ns.FOUR_FACTOR",
+    "component_lifecycle_ns.ADAPTIVE_DECISION where applicable"
+  ],
+  "validation_rule": "Per-run non-empty, unique, count-complete IDs with coherent source and observation lineage; raw bytes may differ across executions."
+}

@@ -1,0 +1,39 @@
+{
+  "D_local_maximum_equivalence": true,
+  "analytic_self_validation": {
+    "augmented_constant": true,
+    "deterministic": true,
+    "finite": true,
+    "small_dt": true,
+    "zero_time": true
+  },
+  "cockpit_equivalence": true,
+  "domain_exit_agreement": true,
+  "exit_dimension_agreement": true,
+  "first_exit_time_agreement": true,
+  "max_D_local_maximum_difference": 5.79502066777593e-07,
+  "max_absolute_error": {
+    "p": 1.621765477466397e-08,
+    "p1": 9.312251400550586e-09,
+    "p2": 5.339989454095084e-09
+  },
+  "max_relative_error": {
+    "p": 1.1307053004770815e-10,
+    "p1": 1.4777308649677203e-06,
+    "p2": 2.4010100479304756e-05
+  },
+  "max_terminal_absolute_error": {
+    "p": 5.962476734566735e-09,
+    "p1": 3.4190666270417225e-09,
+    "p2": 1.9605112255849377e-09
+  },
+  "maximum_tolerance_ratio": 0.04956354480731912,
+  "policy_state_equivalence": true,
+  "price_emission_categorical_equivalence": true,
+  "solves_compared": 55,
+  "status": "PASS",
+  "tolerance_basis": "Frozen RK45 component atol, frozen rtol, compared state magnitude, IEEE-754 epsilon, and 10x local-to-global safety factor over horizon 1.0.",
+  "tolerance_formula": "abs_error <= 10 * (component_atol + rtol * max(abs(reference), abs(candidate)) + float64_epsilon)",
+  "trajectory_equivalence": true,
+  "trajectory_points_compared": 605
+}

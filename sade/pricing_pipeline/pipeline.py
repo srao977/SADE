@@ -1,12 +1,12 @@
 """
 Module/File Name: sade/pricing_pipeline/pipeline.py
-Date Created / Migrated: August 25, 2026
+Date Created / Modified: August 27, 2026
 Purpose:
     Orchestrate SADE Price-side mathematics and PriceEngine emission generation.
 Executive Overview:
     Consumes adaptive pipeline output rows, maintains causal price history, computes
-    p/p1/p2, fits F4 dynamics, performs one-step RK45 projection, assembles
-    PriceEngine numerical payload, and emits PriceEmission.
+    the newly active p1/p2 and F4 fit once, performs one-step analytic projection,
+    assembles PriceEngine numerical payload, and emits PriceEmission.
 Role in SADE:
     SADE-owned pricing pipeline boundary downstream of adaptive pipeline output.
 Inputs:
@@ -16,15 +16,15 @@ Outputs:
 Parameters / Configuration:
     PricingPipelineConfig and migrated PriceEngine policy/cockpit configuration.
 Persistent State:
-    Causal observation history, derivative arrays, policy state, cockpit state,
-    and run-level counters.
+    Bounded causal observation/derivative windows, latest source index, policy
+    state, cockpit state, and run-level counters.
 External Dependencies:
     numpy, scipy, and sade.pricing_pipeline.price_engine package.
 Main Callers / Consumers:
     SADE pricing unit run wiring and integration tests.
 Important Assumptions:
     Source timestamps are consumed as provided; no normalization or cadence logic
-    is added. RK45 projection horizon is fixed to one minute and is distinct from
+    is added. The analytic projection horizon is fixed to one minute and is distinct from
     source timestamp spacing.
 Scientific Provenance:
     Consolidates migrated behavior from:
@@ -37,23 +37,44 @@ Explicit Exclusions / What This Module Does NOT Do:
     - No SDX client usage
     - No volume processing
     - No final BUY/HOLD/SELL execution decision synthesis
+    - No recomputation of prior derivative or F4 fits in the live path
 Failure / Error Behavior:
     Raises explicit errors for missing fields, entity mismatch, source-order
     regression, malformed numerical payload/PriceEngine coherence failures, and
     serialization failures.
+Solution Method Changed:
+    YES; projection trajectory generation uses analytic matrix exponentiation.
+ODE Equations Changed:
+    NO
+Scientific Mathematics Changed:
+    NO
+Computational Scheduling Changed:
+    YES; each derivative and F4 fit is computed only when its index becomes active.
+Historical Recomputation Removed:
+    YES
+Finding 001 Analytic Projection Changed:
+    NO
+Previous Retention:
+    Every source, OHLCV, p1, p2, and jp value for the process lifetime.
+New Retention:
+    max(derivative_window, f4_window)+1 synchronized values; default 31.
+Scientific State Removed:
+    NO
+Hot-Memory Behavior Changed:
+    YES
 """
 
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, deque
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
 import numpy as np
 
-from .derivatives import causal_quadratic
-from .dynamics import fit_f4, valid_fit
+from .derivatives import causal_quadratic_at_index
+from .dynamics import allocate_fit, fit_f4_at_index
 from .numerical import build_numerical_row
 from .projection import solve_cover
 from .price_engine import (
@@ -128,7 +149,7 @@ class PricingPipelineConfig:
 
 
 class PricingPipeline:
-    """Run one causal SADE pricing stream.
+    """Run one causal SADE pricing stream with bounded scientific history.
 
     Purpose:
         Preserve migrated Price mathematics while consuming adaptive output rows.
@@ -146,6 +167,11 @@ class PricingPipeline:
         Raises explicit validation/runtime errors described in process().
     Scientific Meaning:
         Orchestrates migrated math exactly; does not invent new model components.
+    Retention Semantics:
+        Retains max(derivative_window, f4_window)+1 synchronized rows: one pending
+        newest observation and the complete trailing window ending at unchanged
+        active_index=current_index-1. Older rows never affect future calculations.
+        External observation lineage uses the global stream count, never deque index.
     """
 
     def __init__(
@@ -189,14 +215,18 @@ class PricingPipeline:
             )
             self._cockpit = PriceCockpitInterpreter(cockpit_cfg)
 
-        self._source_row_index: list[int] = []
-        self._timestamps: list[str] = []
-        self._times_minutes: list[float] = []
-        self._opens: list[float] = []
-        self._highs: list[float] = []
-        self._lows: list[float] = []
-        self._closes: list[float] = []
-        self._volumes: list[float] = []
+        self._history_limit = max(config.derivative_window, config.f4_window) + 1
+        self._last_source_row_index: int | None = None
+        self._timestamps: deque[str] = deque(maxlen=self._history_limit)
+        self._times_minutes: deque[float] = deque(maxlen=self._history_limit)
+        self._opens: deque[float] = deque(maxlen=self._history_limit)
+        self._highs: deque[float] = deque(maxlen=self._history_limit)
+        self._lows: deque[float] = deque(maxlen=self._history_limit)
+        self._closes: deque[float] = deque(maxlen=self._history_limit)
+        self._volumes: deque[float] = deque(maxlen=self._history_limit)
+        self._p1: deque[float] = deque(maxlen=self._history_limit)
+        self._p2: deque[float] = deque(maxlen=self._history_limit)
+        self._jp: deque[float] = deque(maxlen=self._history_limit)
 
         self._summary: dict[str, Any] = {
             "observations_received": 0,
@@ -227,7 +257,7 @@ class PricingPipeline:
             Step result dictionary with status, optional emission, optional cockpit
             emission, and optional numerical payload.
         Persistent State Changes:
-            Appends history and advances internal policy/cockpit state.
+            Advances bounded history, latest lineage, and policy/cockpit state.
         Side Effects:
             None.
         Assumptions:
@@ -235,7 +265,12 @@ class PricingPipeline:
         Failure / Error Behavior:
             Raises ValueError/RuntimeError for explicit hard-failure conditions.
         Scientific Meaning:
-            Applies migrated derivative -> F4 -> RK45 -> numerical -> PriceEngine flow.
+                Applies derivative -> F4 -> analytic projection -> numerical -> PriceEngine flow.
+            Legacy rk_success/rk45 summary names represent generic projection success
+            and remain unchanged for downstream compatibility.
+        Retention Semantics:
+            At most max(derivative_window, f4_window)+1 aligned rows are retained;
+            discarded rows cannot enter any future active trailing window.
         """
 
         for name in REQUIRED_ADAPTIVE_FIELDS:
@@ -247,14 +282,14 @@ class PricingPipeline:
             raise ValueError(f"ENTITY_MISMATCH expected={self.config.entity} got={entity}")
 
         source_row = int(adaptive_record["source_row_index"])
-        if self._source_row_index and source_row != self._source_row_index[-1] + 1:
+        if self._last_source_row_index is not None and source_row != self._last_source_row_index + 1:
             raise ValueError(
                 "SOURCE_ORDER_REGRESSION "
-                f"expected={self._source_row_index[-1] + 1} got={source_row}"
+                f"expected={self._last_source_row_index + 1} got={source_row}"
             )
+        self._last_source_row_index = source_row
 
         timestamp = str(adaptive_record["source_timestamp"])
-        self._source_row_index.append(source_row)
         self._timestamps.append(timestamp)
         self._times_minutes.append(self._to_minutes(timestamp))
         self._opens.append(float(adaptive_record["open"]))
@@ -262,36 +297,69 @@ class PricingPipeline:
         self._lows.append(float(adaptive_record["low"]))
         self._closes.append(float(adaptive_record["close"]))
         self._volumes.append(float(adaptive_record["volume"]))
+        self._p1.append(float("nan"))
+        self._p2.append(float("nan"))
+        self._jp.append(float("nan"))
 
         self._summary["observations_received"] += 1
+        global_index = self._summary["observations_received"] - 1
+        global_active_index = global_index - 1
         index = len(self._closes) - 1
         active_index = index - 1
 
         if active_index < 0:
-            return self._step_result("WARMUP_DERIVATIVE", index=index)
+            return self._step_result("WARMUP_DERIVATIVE", index=index, logical_index=global_index)
 
         p = np.asarray(self._closes, dtype=float)
         times_minutes = np.asarray(self._times_minutes, dtype=float)
-        p1, p2, _failures = causal_quadratic(times_minutes, p, self.config.derivative_window)
+        active_p1, active_p2, _failures = causal_quadratic_at_index(
+            times_minutes,
+            p,
+            active_index,
+            self.config.derivative_window,
+        )
+        self._p1[active_index] = active_p1
+        self._p2[active_index] = active_p2
+        p1 = np.asarray(self._p1, dtype=float)
+        p2 = np.asarray(self._p2, dtype=float)
 
         if not (np.isfinite(p1[active_index]) and np.isfinite(p2[active_index])):
-            return self._step_result("WARMUP_DERIVATIVE", index=active_index)
+            return self._step_result(
+                "WARMUP_DERIVATIVE",
+                index=active_index,
+                logical_index=global_active_index,
+            )
 
         self._summary["derivative_ready_observations"] += 1
 
-        jp = np.full(len(p), np.nan)
-        for i in range(1, len(p)):
-            if np.isfinite(p2[i - 1]) and np.isfinite(p2[i]):
-                jp[i] = p2[i] - p2[i - 1]
+        if active_index > 0 and np.isfinite(p2[active_index - 1]):
+            self._jp[active_index] = p2[active_index] - p2[active_index - 1]
+        jp = np.asarray(self._jp, dtype=float)
 
-        if active_index < self.config.f4_window or not np.all(
+        if global_active_index < self.config.f4_window or not np.all(
             np.isfinite(jp[active_index - self.config.f4_window + 1 : active_index + 1])
         ):
-            return self._step_result("WARMUP_F4", index=active_index)
+            return self._step_result("WARMUP_F4", index=active_index, logical_index=global_active_index)
 
-        fit = fit_f4(p, p1, p2, jp, self.config.f4_window, self.config.ridge_lambda)
-        if not valid_fit(fit, active_index):
-            return self._step_result("F4_FIT_UNAVAILABLE", index=active_index)
+        active_fit = fit_f4_at_index(
+            p,
+            p1,
+            p2,
+            jp,
+            active_index,
+            self.config.f4_window,
+            self.config.ridge_lambda,
+        )
+        if active_fit is None:
+            return self._step_result(
+                "F4_FIT_UNAVAILABLE",
+                index=active_index,
+                logical_index=global_active_index,
+            )
+
+        fit = allocate_fit(len(p), 4)
+        for name, value in active_fit.items():
+            fit[name][active_index] = value
 
         self._summary["f4_ready_observations"] += 1
         self._summary["rk45_attempts"] += 1
@@ -315,6 +383,8 @@ class PricingPipeline:
             p1=p1,
             p2=p2,
         )
+        numerical["index"] = global_active_index
+        numerical["observation_index"] = global_active_index + 1
 
         if numerical["rk_success"]:
             self._summary["rk45_successes"] += 1
@@ -338,7 +408,7 @@ class PricingPipeline:
         try:
             emission, self._policy_state = self._engine.observe(observation, numerical, self._policy_state)
         except Exception as error:
-            raise RuntimeError(f"PRICE_ENGINE_FAILURE index={active_index + 1}: {error}") from error
+            raise RuntimeError(f"PRICE_ENGINE_FAILURE index={global_active_index + 1}: {error}") from error
 
         self._summary["price_emissions_generated"] += 1
         self._summary["trajectory_phase_counts"][emission.trajectory_phase] += 1
@@ -356,6 +426,7 @@ class PricingPipeline:
         return self._step_result(
             status,
             index=active_index,
+            logical_index=global_active_index,
             numerical=numerical,
             price_emission=emission.as_dict(),
             cockpit_emission=cockpit_payload,
@@ -397,6 +468,7 @@ class PricingPipeline:
         status: str,
         *,
         index: int,
+        logical_index: int,
         numerical: dict[str, Any] | None = None,
         price_emission: dict[str, Any] | None = None,
         cockpit_emission: dict[str, Any] | None = None,
@@ -406,7 +478,7 @@ class PricingPipeline:
             self._summary["warmup_observations"] += 1
         return {
             "status": status,
-            "observation_index": index + 1,
+            "observation_index": logical_index + 1,
             "entity": self.config.entity,
             "source_timestamp": self._timestamps[index],
             "numerical": numerical,

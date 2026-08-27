@@ -1,0 +1,6 @@
+{
+  "aptf_runtime_dependency_in_pricing_pipeline": false,
+  "equivalence_test_module": "tests/test_pricing_migration_equivalence.py",
+  "scientific_math_changed": false,
+  "status": "SEE_PACKAGE_TESTS"
+}

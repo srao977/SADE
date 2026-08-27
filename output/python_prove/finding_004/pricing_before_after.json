@@ -1,0 +1,8 @@
+{
+  "migration_equivalence_byte_exact": true,
+  "observations_csv_byte_exact": true,
+  "observations_sha256_after": "4b3b8783108988e71c4bf2cec9b6f8a4c6bf929fb93a4be27706a16ef4c1752a",
+  "observations_sha256_before": "4b3b8783108988e71c4bf2cec9b6f8a4c6bf929fb93a4be27706a16ef4c1752a",
+  "status": "PASS",
+  "summary_exact": true
+}

@@ -1,0 +1,37 @@
+{
+  "case_count": 55,
+  "threshold_near_case_count": 3,
+  "thresholds": {
+    "condition_median": {
+      "nearest_above": {
+        "active_index": 98,
+        "case_id": "AAPL-000098",
+        "condition": 7.883378835007342,
+        "condition_hex": "0x1.f889476195728p+2",
+        "confidence_state": "MEDIUM",
+        "signed_margin": 0.04759906440404471
+      },
+      "nearest_below_or_equal": {
+        "active_index": 46,
+        "case_id": "AAPL-000046",
+        "condition": 7.7894081860325,
+        "condition_hex": "0x1.f285a9e98d12dp+2",
+        "confidence_state": "MEDIUM",
+        "signed_margin": -0.04637158457079682
+      },
+      "threshold": 7.835779770603297
+    },
+    "condition_q95": {
+      "nearest_above": null,
+      "nearest_below_or_equal": {
+        "active_index": 64,
+        "case_id": "AAPL-000064",
+        "condition": 10.137631024115974,
+        "condition_hex": "0x1.4467792d6fc77p+3",
+        "confidence_state": "LOW",
+        "signed_margin": -2.9026928223095183
+      },
+      "threshold": 13.040323846425492
+    }
+  }
+}

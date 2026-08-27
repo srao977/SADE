@@ -1,0 +1,7 @@
+{
+  "augmented_constant": true,
+  "deterministic": true,
+  "finite": true,
+  "small_dt": true,
+  "zero_time": true
+}

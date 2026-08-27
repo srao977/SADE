@@ -1,0 +1,61 @@
+{
+  "active_index_rule_changed": false,
+  "adaptive": {
+    "deterministic_scientific_fields_exact": true,
+    "emission_id_semantic_validation": "PASS",
+    "observation_id_exact": true,
+    "rows_compared": 100,
+    "status": "PASS"
+  },
+  "derivative": {
+    "active_helper_calls": 99,
+    "active_indices": "0..98 exactly once",
+    "bit_exact_reference_comparison": true,
+    "full_history_lstsq_calls": 3741,
+    "mathematics_changed": false,
+    "production_lstsq_calls": 85,
+    "reduction_percent": 97.7
+  },
+  "f4": {
+    "active_helper_calls": 55,
+    "active_indices": "44..98 exactly once",
+    "bit_exact_fields": [
+      "standardized",
+      "physical",
+      "means",
+      "scales",
+      "minimum",
+      "maximum",
+      "condition"
+    ],
+    "bit_exact_reference_comparison": true,
+    "full_history_ridge_solve_calls": 1540,
+    "mathematics_changed": false,
+    "production_ridge_solve_calls": 55,
+    "reduction_percent": 96.4
+  },
+  "finding_001_regression": {
+    "analytic_vs_rk45": "PASS",
+    "production_rk45_guard": "PASS",
+    "solves_compared": 55,
+    "trajectory_points_compared": 605
+  },
+  "go_code_created": false,
+  "historical_recomputation_removed": true,
+  "package_tests": {
+    "failed": 0,
+    "passed": 19
+  },
+  "pricing": {
+    "migration_equivalence_sha256": "FA3B2A6F5EBC917CF0C626D47235E0B0E4EE6A396A8193BF1BC3B1724992A424",
+    "observations_byte_exact": true,
+    "observations_sha256": "4B3B8783108988E71C4BF2CEC9B6F8A4C6BF929FB93A4BE27706A16EF4C1752A",
+    "status": "PASS"
+  },
+  "projection_changed": false,
+  "scientific_mathematics_changed": false,
+  "sdx_modified": false,
+  "sdx_revision": "1b685678e5dbbcb4ed93c2aaf9259f42353c3a3e",
+  "status": "PASS",
+  "unbounded_state_fix_included": false
+}

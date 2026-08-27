@@ -1,0 +1,49 @@
+{
+  "BUY": 8,
+  "C_max": 0.5091643749101453,
+  "C_min": 0.0,
+  "HOLD": 67,
+  "H_max": 1.0,
+  "H_min": 1.0,
+  "Q_G_max": 1.0,
+  "Q_G_min": 0.0,
+  "Q_R_max": 0.6806070267937718,
+  "Q_R_min": 0.2366891430678969,
+  "Q_S_max": 0.8099896733017667,
+  "Q_S_min": 0.2060837882716345,
+  "SELL": 10,
+  "actionable": 85,
+  "adaptation_event_count": 331,
+  "assumptions": {
+    "data_valid": "true (SADE INPUT ASSUMPTION - NOT SDX SOURCE DATA)",
+    "session_type": "UNKNOWN (SADE PLACEHOLDER - NOT SDX SOURCE DATA)"
+  },
+  "cadence_logic": "NONE",
+  "entity": "AAPL",
+  "failures": [],
+  "feedback_event_count": 170,
+  "first_actionable": 16,
+  "generated_at_utc": "2026-08-27T17:51:35.444895+00:00",
+  "initializing": 15,
+  "irregular_source_time_gap_count": 28,
+  "output_dir": "output\\python_prove\\finding_002\\after\\adaptive",
+  "path_direction_counts": {
+    "DOWNWARD": 52,
+    "FLAT": 1,
+    "UPWARD": 47
+  },
+  "position_state_after_counts": {
+    "FLAT": 15,
+    "LONG": 34,
+    "SHORT": 51
+  },
+  "source_delta_t_seconds_max": 300.0,
+  "source_delta_t_seconds_min": 60.0,
+  "source_timestamp_first": "2022-09-30 04:00:00",
+  "source_timestamp_last": "2022-09-30 06:21:00",
+  "source_timestamp_preserved": true,
+  "status": "COMPLETE",
+  "timestamp_normalization": false,
+  "vectors_received": 100,
+  "vectors_requested": 100
+}

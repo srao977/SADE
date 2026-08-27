@@ -1,0 +1,7 @@
+{
+  "analytic_vs_reference": "PASS",
+  "focused_tests_passed": 2,
+  "production_projection": "ANALYTIC_EXPM",
+  "production_rk45_executed": false,
+  "status": "PASS"
+}

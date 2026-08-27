@@ -58,7 +58,7 @@ from sade.pricing_pipeline.price_engine import (
     PriceCockpitInterpreter,
     PriceEngine,
 )
-from sade.pricing_pipeline.projection import solve_cover
+from sade.pricing_pipeline.projection import solve_cover, solve_cover_rk45_reference
 
 
 APTF_ROOT = Path("C:/Users/chino/APTF")
@@ -112,7 +112,7 @@ def test_causal_quadratic_equivalence(aptf_modules) -> None:
     assert f_s == f_a
 
 
-def test_f4_and_rk45_equivalence(aptf_modules) -> None:
+def test_f4_and_rk45_reference_equivalence(aptf_modules) -> None:
     deriv, val13b, *_ = aptf_modules
     _ts, tm, p = _fixture_series()
     p1, p2, _ = deriv.causal_quadratic(tm, p, 15)
@@ -131,9 +131,22 @@ def test_f4_and_rk45_equivalence(aptf_modules) -> None:
     np.testing.assert_allclose(fit_s["scales"][idx], fit_a["scales"][idx])
 
     solved_a, failed_a = val13b.solve_cover([idx], fit_a, p, p1, p2, False)
-    solved_s, failed_s = solve_cover([idx], fit_s, p, p1, p2, False, val13b.RTOL, val13b.EPSILON)
+    solved_s, failed_s = solve_cover_rk45_reference(
+        [idx], fit_s, p, p1, p2, False, val13b.RTOL, val13b.EPSILON
+    )
     assert failed_s == failed_a
     np.testing.assert_allclose(solved_s[idx]["trajectory"], solved_a[idx]["trajectory"])
+
+    solved_analytic, failed_analytic = solve_cover(
+        [idx], fit_s, p, p1, p2, False, val13b.RTOL, val13b.EPSILON
+    )
+    assert failed_analytic == failed_a
+    np.testing.assert_allclose(
+        solved_analytic[idx]["trajectory"],
+        solved_a[idx]["trajectory"],
+        rtol=1e-6,
+        atol=1e-8,
+    )
 
 
 def test_numerical_and_price_engine_equivalence(aptf_modules) -> None:

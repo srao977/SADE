@@ -1,0 +1,186 @@
+{
+  "checkpoints": {
+    "0": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 0,
+        "PricingPipeline.derivative_history": 0,
+        "PricingPipeline.price_time_ohlcv_history": 0
+      },
+      "events": {
+        "adaptation_event_count": 0,
+        "emission_count": 0,
+        "feedback_event_count": 0,
+        "initialization_count": 0,
+        "trace_count": 0
+      }
+    },
+    "100": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 1,
+        "PricingPipeline.derivative_history": 31,
+        "PricingPipeline.price_time_ohlcv_history": 31
+      },
+      "events": {
+        "adaptation_event_count": 321,
+        "emission_count": 85,
+        "feedback_event_count": 170,
+        "initialization_count": 15,
+        "trace_count": 100
+      }
+    },
+    "1000": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 1,
+        "PricingPipeline.derivative_history": 31,
+        "PricingPipeline.price_time_ohlcv_history": 31
+      },
+      "events": {
+        "adaptation_event_count": 3706,
+        "emission_count": 985,
+        "feedback_event_count": 1970,
+        "initialization_count": 15,
+        "trace_count": 1000
+      }
+    },
+    "15": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 1,
+        "PricingPipeline.derivative_history": 15,
+        "PricingPipeline.price_time_ohlcv_history": 15
+      },
+      "events": {
+        "adaptation_event_count": 10,
+        "emission_count": 0,
+        "feedback_event_count": 0,
+        "initialization_count": 15,
+        "trace_count": 15
+      }
+    },
+    "250": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 1,
+        "PricingPipeline.derivative_history": 31,
+        "PricingPipeline.price_time_ohlcv_history": 31
+      },
+      "events": {
+        "adaptation_event_count": 876,
+        "emission_count": 235,
+        "feedback_event_count": 470,
+        "initialization_count": 15,
+        "trace_count": 250
+      }
+    },
+    "500": {
+      "collections": {
+        "AdaptiveEmitter.adaptation_audit": 0,
+        "AdaptiveEmitter.emissions": 0,
+        "AdaptiveEmitter.feedback_audit": 0,
+        "AdaptiveEmitter.initialization": 0,
+        "AdaptivePipeline._rows": 0,
+        "AdaptivePipeline.run_metric_aggregate_slots": 13,
+        "D01V02Model.trace_records": 0,
+        "PricingPipeline._source_row_index": 1,
+        "PricingPipeline.derivative_history": 31,
+        "PricingPipeline.price_time_ohlcv_history": 31
+      },
+      "events": {
+        "adaptation_event_count": 1826,
+        "emission_count": 485,
+        "feedback_event_count": 970,
+        "initialization_count": 15,
+        "trace_count": 500
+      }
+    }
+  },
+  "configured_scientific_bound": 31,
+  "emissions_after_observation_100": 900,
+  "final_collections": {
+    "AdaptiveEmitter.adaptation_audit": 0,
+    "AdaptiveEmitter.emissions": 0,
+    "AdaptiveEmitter.feedback_audit": 0,
+    "AdaptiveEmitter.initialization": 0,
+    "AdaptivePipeline._rows": 0,
+    "AdaptivePipeline.run_metric_aggregate_slots": 13,
+    "D01V02Model.trace_records": 0,
+    "PricingPipeline._source_row_index": 1,
+    "PricingPipeline.derivative_history": 31,
+    "PricingPipeline.price_time_ohlcv_history": 31
+  },
+  "observations_processed": 1000,
+  "pricing_summary": {
+    "confidence_state_counts": {
+      "LOW": 413,
+      "MEDIUM": 542
+    },
+    "derivative_ready_observations": 985,
+    "domain_exits": 303,
+    "f4_ready_observations": 955,
+    "observations_received": 1000,
+    "price_cockpit_outputs": 955,
+    "price_color_counts": {
+      "AMBER": 520,
+      "GREEN": 205,
+      "RED": 230
+    },
+    "price_emissions_generated": 955,
+    "rk45_attempts": 955,
+    "rk45_failures": 0,
+    "rk45_successes": 955,
+    "step_status_counts": {
+      "EMITTED": 955,
+      "WARMUP_DERIVATIVE": 15,
+      "WARMUP_F4": 30
+    },
+    "trajectory_phase_counts": {
+      "DOWN_ACCELERATING": 429,
+      "DOWN_DECELERATING": 40,
+      "NEAR_STATIONARY": 20,
+      "TURNING_DOWN": 10,
+      "UP_ACCELERATING": 409,
+      "UP_DECELERATING": 47
+    },
+    "turning_tendency_counts": {
+      "DETERIORATING_TOWARD_TURN": 47,
+      "NONE": 832,
+      "PROJECTED_P2_REVERSAL": 36,
+      "RECOVERING_TOWARD_TURN": 40
+    },
+    "warmup_observations": 45
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,172 @@
+{
+  "beta": {
+    "order": [
+      "standardized_intercept",
+      "standardized_p_slope",
+      "standardized_p1_slope",
+      "standardized_p2_slope"
+    ],
+    "shape": [
+      4
+    ]
+  },
+  "comparison_requirements": {
+    "condition_threshold_result": "CATEGORICAL EXACT",
+    "inputs_and_intermediates": "FLOAT64 NUMERICAL; Python replay BIT-EXACT; future Go tolerance requires separate approval",
+    "price_emission_and_cockpit_categories": "CATEGORICAL EXACT",
+    "valid_fit": "EXACT"
+  },
+  "condition_number": {
+    "default_norm": "2-norm via singular values",
+    "input_matrix": "design",
+    "not_input": [
+      "design.T @ design",
+      "ridge-adjusted normal matrix"
+    ],
+    "operation": "np.linalg.cond(design)"
+  },
+  "design_matrix": {
+    "columns": [
+      "intercept_ones",
+      "standardized_p",
+      "standardized_p1",
+      "standardized_p2"
+    ],
+    "shape": [
+      30,
+      4
+    ]
+  },
+  "downstream_condition_consumers": [
+    {
+      "categorical_output": "confidence_state",
+      "field": "condition_number",
+      "function": "EmissionPolicy.emit",
+      "module": "sade.pricing_pipeline.price_engine.policy",
+      "operator": "<=",
+      "threshold": 7.835779770603297,
+      "threshold_name": "condition_median"
+    },
+    {
+      "categorical_output": "confidence_state",
+      "field": "condition_number",
+      "function": "EmissionPolicy.emit",
+      "module": "sade.pricing_pipeline.price_engine.policy",
+      "operator": "<=",
+      "threshold": 13.040323846425492,
+      "threshold_name": "condition_q95"
+    }
+  ],
+  "dtype": "numpy.float64 in production PricingPipeline arrays",
+  "future_go_sequence": [
+    "means",
+    "population scales",
+    "standardized values",
+    "normal matrix",
+    "beta",
+    "physical coefficients",
+    "condition",
+    "confidence threshold result",
+    "downstream categories"
+  ],
+  "future_go_stop_rule": "Stop at the first divergence",
+  "gonum_warning": "Do not use a Bessel-corrected sample standard deviation; reproduce population ddof=0 explicitly.",
+  "implementation": {
+    "functions": [
+      "fit_f4",
+      "fit_f4_at_index"
+    ],
+    "module": "sade.pricing_pipeline.dynamics"
+  },
+  "input_window": {
+    "columns": [
+      "p",
+      "p1",
+      "p2"
+    ],
+    "ids": "arange(index-window+1, index+1)",
+    "size": 30,
+    "target": "jp[ids]"
+  },
+  "mean": {
+    "axis": 0,
+    "operation": "values.mean(axis=0)"
+  },
+  "minimum_maximum": {
+    "axis": 0,
+    "operation": [
+      "values.min(axis=0)",
+      "values.max(axis=0)"
+    ]
+  },
+  "normal_equations": {
+    "matrix": "design.T @ design + ridge_lambda * ridge",
+    "rhs": "design.T @ jp[ids]",
+    "solve": "np.linalg.solve(matrix, rhs)"
+  },
+  "physical": {
+    "intercept": "beta[0] - slopes @ means",
+    "order": [
+      "intercept",
+      "p_slope",
+      "p1_slope",
+      "p2_slope"
+    ],
+    "slopes": "beta[1:] / scales"
+  },
+  "ridge": {
+    "intercept_penalized": false,
+    "lambda": 1.0,
+    "matrix": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scale_guards": {
+    "invalid_if": [
+      "any scale <= 0",
+      "not all scales finite"
+    ],
+    "near_zero_special_case": "none"
+  },
+  "schema_version": "fit_f4_golden_corpus.v1",
+  "standard_deviation": {
+    "axis": 0,
+    "ddof": 0,
+    "formula": "sqrt(sum((x-mean)^2)/N)",
+    "kind": "population",
+    "operation": "values.std(axis=0, ddof=0)"
+  },
+  "standardization": "(values - means) / scales",
+  "valid_fit": {
+    "active_helper_additional_invalid": [
+      "index outside [window-1, len(p)-2]",
+      "nonfinite jp window",
+      "invalid scales",
+      "np.linalg.solve raises LinAlgError"
+    ],
+    "operation": "all standardized beta coefficients are finite"
+  }
+}

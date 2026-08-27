@@ -1,6 +1,6 @@
 """
 Module/File Name: sade/adaptive_emitter/emitter.py
-Date Created / Migrated: August 25, 2026
+Date Created / Modified: August 27, 2026
 Purpose:
     Execute the SADE V0.1 adaptive scientific path for one causal observation
     at a time.
@@ -13,13 +13,12 @@ Role in SADE:
 Inputs:
     physical_row and source_row records passed by the adaptive pipeline.
 Outputs:
-    immutable emission dictionaries, initialization records, adaptation audit,
-    and feedback audit entries.
+    immutable emission dictionaries and optional diagnostic capture records.
 Parameters / Configuration:
-    entity_id, rule_fingerprint, code_fingerprint.
+    entity_id, rule_fingerprint, code_fingerprint, retain_diagnostics.
 Persistent State:
     rolling context, position state, previous decision, completed_count,
-    adaptation and feedback audit collections.
+    diagnostic counters, and optional explicitly enabled diagnostic collections.
 External Dependencies:
     sade.d01.v02.model.D01V02Model
     sade.d02.v02.builder.build_return_shape
@@ -39,6 +38,16 @@ Explicit Exclusions / What This Module Does NOT Do:
 Failure / Error Behavior:
     Raises RuntimeError for invalid observations, causal violations, or invalid
     terminal decisions.
+Previous Retention:
+    Every emission, initialization record, adaptation event, and feedback event.
+New Retention:
+    Production retains counters only; full diagnostic history requires explicit opt-in.
+Scientific State Removed:
+    NO
+Scientific Mathematics Changed:
+    NO
+Hot-Memory Behavior Changed:
+    YES
 """
 
 from __future__ import annotations
@@ -122,25 +131,53 @@ class DevelopmentObservationStream:
 
 
 class AdaptiveEmitter:
-    """Execute one-step adaptive processing on source rows.
+    """Execute one-step adaptive processing with bounded production diagnostics.
 
-    Args:
-        entity_id: target source entity.
-        rule_fingerprint: scientific rule identity.
-        code_fingerprint: scientific implementation identity.
+    Purpose:
+        Compute the adaptive scientific output for one causally ordered source row.
+    Arguments / Inputs:
+        Entity and scientific fingerprints; optional explicit diagnostic retention.
+    Returns / Outputs:
+        Stateful emitter instance whose process method returns one emission per row.
+    Persistent State Changes:
+        Maintains bounded scientific context/state and aggregate diagnostic counts.
+    Side Effects:
+        None unless a caller explicitly retains diagnostic history.
+    Assumptions:
+        One emitter instance owns one causally ordered entity stream.
+    Failure / Error Behavior:
+        Invalid observations, causal violations, and invalid decisions raise.
+    Scientific Meaning:
+        Orchestrates unchanged D01, D02, D04, and adaptive decision mathematics.
+    Retention Semantics:
+        Production maximum for non-scientific histories is zero. Setting
+        retain_diagnostics=True captures full history for a caller-bounded test/run;
+        captured records never feed future scientific processing.
     """
 
-    def __init__(self, entity_id: str, rule_fingerprint: str, code_fingerprint: str) -> None:
+    def __init__(
+        self,
+        entity_id: str,
+        rule_fingerprint: str,
+        code_fingerprint: str,
+        *,
+        retain_diagnostics: bool = False,
+    ) -> None:
         self.entity_id = entity_id
         self.rule_fingerprint = rule_fingerprint
         self.code_fingerprint = code_fingerprint
-        self.d01 = D01V02Model(entity_id=entity_id)
+        self.d01 = D01V02Model(entity_id=entity_id, retain_diagnostics=retain_diagnostics)
         self.normalizer = SourceRowNormalizer(entity_id=entity_id)
         self.capturability = CapturabilityModelV0_2()
         self.context: deque[dict[str, Any]] = deque(maxlen=CONTEXT_LENGTH)
         self.position_state = "FLAT"
         self.previous_decision: str | None = None
         self.completed_count = 0
+        self.retain_diagnostics = retain_diagnostics
+        self.emission_count = 0
+        self.initialization_count = 0
+        self.adaptation_event_count = 0
+        self.feedback_event_count = 0
         self.emissions: list[dict[str, Any]] = []
         self.initialization: list[dict[str, Any]] = []
         self.adaptation_audit: list[dict[str, Any]] = []
@@ -176,12 +213,26 @@ class AdaptiveEmitter:
     def process(self, physical_row: int, source_row: dict[str, str]) -> dict[str, Any]:
         """Process one source row into an immutable adaptive emission.
 
-        Args:
-            physical_row: compatibility row identity expected by frozen seam.
-            source_row: mapped source observation dictionary.
-
-        Returns:
-            Emission dictionary including scientific outputs and state transition.
+        Purpose:
+            Execute unchanged D01, D02, D04, and adaptive decision sequencing.
+        Arguments / Inputs:
+            Compatibility physical-row identity and mapped source observation.
+        Returns / Outputs:
+            Emission dictionary containing scientific outputs and state transition.
+        Persistent State Changes:
+            Advances scientific context/state and aggregate diagnostic counters.
+        Side Effects:
+            Appends diagnostic records only when retain_diagnostics is explicitly true.
+        Assumptions:
+            Source observations are causally ordered with strictly increasing times.
+        Failure / Error Behavior:
+            Invalid input, causality, decision, and mutation checks raise RuntimeError.
+        Scientific Meaning:
+            Produces the authoritative Adaptive emission for one observation.
+        Retention Semantics:
+            Context retains exactly CONTEXT_LENGTH=15 scientific records. Production
+            diagnostic histories retain zero records; full history is externally
+            capturable through explicit finite-run diagnostic mode and never feeds science.
         """
         lifecycle_start = time.perf_counter_ns()
         stage: dict[str, int] = {}
@@ -320,48 +371,54 @@ class AdaptiveEmitter:
             for name, new_value in new_adaptive.items():
                 old_value = None if prior_adaptive is None else prior_adaptive[name]
                 if old_value != new_value:
-                    self.adaptation_audit.append(
-                        {
-                            "property": name,
-                            "old_value": old_value,
-                            "new_value": new_value,
-                            "causal_observation_id": observation_id,
-                            "rolling_context_ids": [item["observation_id"] for item in self.context],
-                            "equation": "defined rolling-15 operator",
-                            "timestamp": source_row["event_timestamp_utc"],
-                            "effective_observation": self.completed_count + 2,
-                        }
-                    )
+                    adaptation_event = {
+                        "property": name,
+                        "old_value": old_value,
+                        "new_value": new_value,
+                        "causal_observation_id": observation_id,
+                        "rolling_context_ids": [item["observation_id"] for item in self.context],
+                        "equation": "defined rolling-15 operator",
+                        "timestamp": source_row["event_timestamp_utc"],
+                        "effective_observation": self.completed_count + 2,
+                    }
+                    self.adaptation_event_count += 1
+                    if self.retain_diagnostics:
+                        self.adaptation_audit.append(adaptation_event)
         if decision is not None:
-            self.feedback_audit.extend(
-                [
-                    {
-                        "source_emission_id": emission_id,
-                        "feedback_property": "position_decision",
-                        "target_state_property": "previous_decision",
-                        "old_value": old_decision,
-                        "new_value": decision,
-                        "equation": "previous_decision_(n+1)=decision_n",
-                        "timestamp": source_row["event_timestamp_utc"],
-                        "effective_observation": self.completed_count + 2,
-                    },
-                    {
-                        "source_emission_id": emission_id,
-                        "feedback_property": "position_transition",
-                        "target_state_property": "position_state",
-                        "old_value": old_position,
-                        "new_value": next_position,
-                        "equation": "BUY->LONG; SELL->SHORT; HOLD->preserve",
-                        "timestamp": source_row["event_timestamp_utc"],
-                        "effective_observation": self.completed_count + 2,
-                    },
-                ]
-            )
+            feedback_events = [
+                {
+                    "source_emission_id": emission_id,
+                    "feedback_property": "position_decision",
+                    "target_state_property": "previous_decision",
+                    "old_value": old_decision,
+                    "new_value": decision,
+                    "equation": "previous_decision_(n+1)=decision_n",
+                    "timestamp": source_row["event_timestamp_utc"],
+                    "effective_observation": self.completed_count + 2,
+                },
+                {
+                    "source_emission_id": emission_id,
+                    "feedback_property": "position_transition",
+                    "target_state_property": "position_state",
+                    "old_value": old_position,
+                    "new_value": next_position,
+                    "equation": "BUY->LONG; SELL->SHORT; HOLD->preserve",
+                    "timestamp": source_row["event_timestamp_utc"],
+                    "effective_observation": self.completed_count + 2,
+                },
+            ]
+            self.feedback_event_count += len(feedback_events)
+            if self.retain_diagnostics:
+                self.feedback_audit.extend(feedback_events)
             self.position_state = next_position
             self.previous_decision = decision
-            self.emissions.append(deepcopy(emission))
+            self.emission_count += 1
+            if self.retain_diagnostics:
+                self.emissions.append(deepcopy(emission))
         else:
-            self.initialization.append(deepcopy(emission))
+            self.initialization_count += 1
+            if self.retain_diagnostics:
+                self.initialization.append(deepcopy(emission))
 
         self.completed_count += 1
         self._last_source_time = observation.event_time

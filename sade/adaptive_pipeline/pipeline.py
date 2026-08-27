@@ -1,13 +1,13 @@
 """
 Module/File Name: sade/adaptive_pipeline/pipeline.py
-Date Created / Migrated: August 25, 2026
+Date Created / Modified: August 27, 2026
 Purpose:
     Implement SADE Adaptive Pipeline orchestration with zero runtime dependency
     on APTF repository paths.
 Executive Overview:
     The pipeline requests SDX MarketVectors, validates causal order and entity,
-    maps vectors into the frozen adaptive emitter seam, and writes SADE-owned
-    unit-run outputs.
+    maps vectors into the frozen adaptive emitter seam, and streams SADE-owned
+    unit-run outputs without retaining every row in production hot memory.
 Role in SADE:
     V0.1 primary product capability runtime.
 Inputs:
@@ -17,7 +17,8 @@ Outputs:
 Parameters / Configuration:
     AdaptivePipelineConfig.
 Persistent State:
-    expected_next_index, vectors_received, collected observation rows.
+    expected_next_index, vectors_received, first/latest timestamps, and optional
+    explicitly enabled output-row capture.
 External Dependencies:
     sade.input.sdx_client.SadeSdxClient
     sade.adaptive_emitter.AdaptiveEmitter
@@ -35,6 +36,17 @@ Explicit Exclusions / What This Module Does NOT Do:
 Failure / Error Behavior:
     Raises explicit failures for malformed vectors, stream shortfall, entity
     mismatch, row-order regression, RPC failures, and emitter failures.
+Previous Retention:
+    Every flattened output row until run completion.
+New Retention:
+    Rows stream directly to CSV; production retains first/latest timestamps only;
+    run metrics retain six min/max pairs plus one irregular-gap counter.
+Scientific State Removed:
+    NO
+Scientific Mathematics Changed:
+    NO
+Hot-Memory Behavior Changed:
+    YES
 """
 
 from __future__ import annotations
@@ -53,6 +65,15 @@ from sade.input.sdx_client import DEFAULT_ENDPOINT, SadeSdxClient
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_UNIT_RUN_OUTPUT_DIR = ROOT / "output" / "unit_runs" / "001"
+OBSERVATION_FIELDNAMES = (
+    "pipeline_observation_number", "source_row_index", "source_timestamp", "entity_id",
+    "open", "high", "low", "close", "volume", "physical_row", "status",
+    "observation_id", "emission_id", "source_delta_t_seconds", "decision_rule_path",
+    "H", "Q_G", "Q_S", "Q_R", "C", "path_direction", "terminal_displacement",
+    "strength", "coherence", "persistence", "uncertainty", "reversal_propensity",
+    "position_decision", "position_state_before", "position_state_after",
+    "prior_context_count", "adaptation_event_delta", "feedback_event_delta",
+)
 
 
 def physical_row_from_source_index(source_row_index: int) -> int:
@@ -197,6 +218,7 @@ class AdaptivePipelineConfig:
     summary_json_name: str = "summary.json"
     rule_fingerprint: str = ""
     code_fingerprint: str = ""
+    retain_records: bool = False
 
     def __post_init__(self) -> None:
         if not self.entity.strip():
@@ -208,7 +230,29 @@ class AdaptivePipelineConfig:
 
 
 class AdaptivePipeline:
-    """Run one entity stream through SADE adaptive scientific modules."""
+    """Run one entity stream with bounded production output retention.
+
+    Purpose:
+        Orchestrate one Adaptive stream and persist each flattened output row.
+    Arguments / Inputs:
+        Pipeline configuration plus optional client and emitter test seams.
+    Returns / Outputs:
+        Per-vector records and run summary/artifact files.
+    Persistent State Changes:
+        Advances ordering/count state and first/latest timestamp metadata.
+    Side Effects:
+        run streams observations to the configured CSV path.
+    Assumptions:
+        One pipeline instance owns one causally ordered entity stream.
+    Failure / Error Behavior:
+        Existing validation, stream, emitter, and serialization failures propagate.
+    Scientific Meaning:
+        Orchestration and output persistence only; scientific equations are unchanged.
+    Retention Semantics:
+        Production retains zero output rows and streams them to CSV. Explicit
+        retain_records=True captures full history for a caller-bounded test/run;
+        captured rows never affect future science.
+    """
 
     def __init__(self, config: AdaptivePipelineConfig, client: SadeSdxClient | None = None, emitter: Any | None = None) -> None:
         self.config = config
@@ -227,6 +271,9 @@ class AdaptivePipeline:
         self._rows: list[dict[str, Any]] = []
         self._expected_index = 0
         self._vectors_received = 0
+        self._first_source_timestamp: str | None = None
+        self._last_source_timestamp: str | None = None
+        self._csv_writer: csv.DictWriter | None = None
         self._closed = False
 
     @property
@@ -238,12 +285,33 @@ class AdaptivePipeline:
         return self.config.output_dir / self.config.summary_json_name
 
     def process_vector(self, vector: Any) -> dict[str, Any]:
-        """Process one MarketVector causally and return flattened record."""
+        """Process one MarketVector causally and return its flattened record.
+
+        Purpose:
+            Validate ordering, invoke AdaptiveEmitter, and prepare one output row.
+        Arguments / Inputs:
+            One MarketVector-like source object.
+        Returns / Outputs:
+            Flattened scientific/output record for the observation.
+        Persistent State Changes:
+            Advances order/count and first/latest timestamp state.
+        Side Effects:
+            Writes one CSV row when called by run; optional explicit row capture.
+        Assumptions:
+            Vector belongs to the configured entity and expected source index.
+        Failure / Error Behavior:
+            Validation and emitter failures propagate with observation context.
+        Scientific Meaning:
+            Orchestration only; scientific values are passed through unchanged.
+        Retention Semantics:
+            Production retains zero rows; run streams each row immediately. Explicit
+            retain_records captures full history for a caller-bounded validation run.
+        """
         if self.config.require_strict_row_increment:
             _validate_vector(vector, self.config.entity, self._expected_index)
 
-        before_adaptation = len(self._emitter.adaptation_audit)
-        before_feedback = len(self._emitter.feedback_audit)
+        before_adaptation = self._emitter.adaptation_event_count
+        before_feedback = self._emitter.feedback_event_count
 
         source_row = build_source_row(vector)
         physical_row = physical_row_from_source_index(int(vector.source_row_index))
@@ -257,8 +325,8 @@ class AdaptivePipeline:
                 f"observation={observation_number} source_row_index={vector.source_row_index}: {error}"
             ) from error
 
-        adaptation_delta = len(self._emitter.adaptation_audit) - before_adaptation
-        feedback_delta = len(self._emitter.feedback_audit) - before_feedback
+        adaptation_delta = self._emitter.adaptation_event_count - before_adaptation
+        feedback_delta = self._emitter.feedback_event_count - before_feedback
 
         record = _build_record(
             observation_number=observation_number,
@@ -269,72 +337,101 @@ class AdaptivePipeline:
             feedback_event_delta=feedback_delta,
         )
 
-        self._rows.append(record)
+        if self.config.retain_records:
+            self._rows.append(record)
+        if self._csv_writer is not None:
+            self._csv_writer.writerow(record)
+        if self._first_source_timestamp is None:
+            self._first_source_timestamp = str(record["source_timestamp"])
+        self._last_source_timestamp = str(record["source_timestamp"])
         self._expected_index += 1
         self._vectors_received += 1
         return record
 
     def run(self) -> dict[str, Any]:
-        """Execute bounded stream run and serialize SADE-owned output files."""
+        """Execute a configured stream and serialize SADE-owned output files.
+
+        Purpose:
+            Consume the SDX stream, persist each row, and build the existing summary.
+        Arguments / Inputs:
+            Uses configured client, entity, observation limit, and output paths.
+        Returns / Outputs:
+            JSON-serializable run summary and CSV/JSON artifacts.
+        Persistent State Changes:
+            Advances pipeline/emitter state and writes first/latest timestamp metadata.
+        Side Effects:
+            Streams observations.csv and writes summary.json.
+        Assumptions:
+            The stream supplies exactly max_vectors valid ordered observations.
+        Failure / Error Behavior:
+            Stream/processing failures are recorded in the returned failed summary.
+        Scientific Meaning:
+            Reporting/orchestration only; no scientific transformation is introduced.
+        Retention Semantics:
+            Output rows are externally streamed. Summary metrics use six fixed min/max
+            pairs and one counter, independent of observation count; no metric history
+            affects future scientific processing.
+        """
         failures: list[str] = []
         status_counts: Counter[str] = Counter()
         decision_counts: Counter[str] = Counter()
         path_counts: Counter[str] = Counter()
         position_after_counts: Counter[str] = Counter()
 
-        h_values: list[float] = []
-        qg_values: list[float] = []
-        qs_values: list[float] = []
-        qr_values: list[float] = []
-        c_values: list[float] = []
-        delta_seconds: list[float] = []
+        metric_bounds: dict[str, list[float | None]] = {
+            name: [None, None] for name in ("H", "Q_G", "Q_S", "Q_R", "C", "source_delta_t_seconds")
+        }
+        irregular_source_time_gap_count = 0
 
         first_actionable: int | None = None
 
-        try:
-            stream = self._client.stream_vectors(
-                entities=[self.config.entity],
-                max_vectors_per_entity=self.config.max_vectors,
-                timeout_seconds=self.config.timeout_seconds,
-            )
-            for vector in stream:
-                row = self.process_vector(vector)
-                status = str(row["status"])
-                status_counts[status] += 1
-                path_counts[str(row["path_direction"])] += 1
-                position_after_counts[str(row["position_state_after"])] += 1
-
-                if row["H"] is not None:
-                    h_values.append(float(row["H"]))
-                if row["Q_G"] is not None:
-                    qg_values.append(float(row["Q_G"]))
-                if row["Q_S"] is not None:
-                    qs_values.append(float(row["Q_S"]))
-                if row["Q_R"] is not None:
-                    qr_values.append(float(row["Q_R"]))
-                if row["C"] is not None:
-                    c_values.append(float(row["C"]))
-                if row["source_delta_t_seconds"] is not None:
-                    delta_seconds.append(float(row["source_delta_t_seconds"]))
-
-                if status == "ACTIONABLE" and first_actionable is None:
-                    first_actionable = int(row["pipeline_observation_number"])
-
-                decision = row["position_decision"]
-                if decision in {"BUY", "SELL", "HOLD"}:
-                    decision_counts[str(decision)] += 1
-
-                if self._vectors_received >= self.config.max_vectors:
-                    break
-
-            if self._vectors_received != self.config.max_vectors:
-                raise RuntimeError(
-                    f"SHORT_STREAM expected={self.config.max_vectors} got={self._vectors_received}"
+        self.observations_csv_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.observations_csv_path.open("w", newline="", encoding="utf-8") as csv_handle:
+            self._csv_writer = csv.DictWriter(csv_handle, fieldnames=OBSERVATION_FIELDNAMES)
+            self._csv_writer.writeheader()
+            try:
+                stream = self._client.stream_vectors(
+                    entities=[self.config.entity],
+                    max_vectors_per_entity=self.config.max_vectors,
+                    timeout_seconds=self.config.timeout_seconds,
                 )
-        except Exception as error:
-            failures.append(f"PIPELINE_FAILURE {type(error).__name__}: {error}")
+                for vector in stream:
+                    row = self.process_vector(vector)
+                    status = str(row["status"])
+                    status_counts[status] += 1
+                    path_counts[str(row["path_direction"])] += 1
+                    position_after_counts[str(row["position_state_after"])] += 1
 
-        self._write_csv()
+                    for name, bounds in metric_bounds.items():
+                        if row[name] is None:
+                            continue
+                        value = float(row[name])
+                        bounds[0] = value if bounds[0] is None else min(bounds[0], value)
+                        bounds[1] = value if bounds[1] is None else max(bounds[1], value)
+                    if row["source_delta_t_seconds"] is not None and abs(
+                        float(row["source_delta_t_seconds"]) - 60.0
+                    ) > 1e-9:
+                        irregular_source_time_gap_count += 1
+
+                    if status == "ACTIONABLE" and first_actionable is None:
+                        first_actionable = int(row["pipeline_observation_number"])
+
+                    decision = row["position_decision"]
+                    if decision in {"BUY", "SELL", "HOLD"}:
+                        decision_counts[str(decision)] += 1
+
+                    if self._vectors_received >= self.config.max_vectors:
+                        break
+
+                if self._vectors_received != self.config.max_vectors:
+                    raise RuntimeError(
+                        f"SHORT_STREAM expected={self.config.max_vectors} got={self._vectors_received}"
+                    )
+            except Exception as error:
+                failures.append(f"PIPELINE_FAILURE {type(error).__name__}: {error}")
+            finally:
+                self._csv_writer = None
+
         summary = {
             "status": "FAILED" if failures else "COMPLETE",
             "entity": self.config.entity,
@@ -346,25 +443,25 @@ class AdaptivePipeline:
             "SELL": int(decision_counts.get("SELL", 0)),
             "HOLD": int(decision_counts.get("HOLD", 0)),
             "first_actionable": first_actionable,
-            "H_min": min(h_values) if h_values else None,
-            "H_max": max(h_values) if h_values else None,
-            "Q_G_min": min(qg_values) if qg_values else None,
-            "Q_G_max": max(qg_values) if qg_values else None,
-            "Q_S_min": min(qs_values) if qs_values else None,
-            "Q_S_max": max(qs_values) if qs_values else None,
-            "Q_R_min": min(qr_values) if qr_values else None,
-            "Q_R_max": max(qr_values) if qr_values else None,
-            "C_min": min(c_values) if c_values else None,
-            "C_max": max(c_values) if c_values else None,
+            "H_min": metric_bounds["H"][0],
+            "H_max": metric_bounds["H"][1],
+            "Q_G_min": metric_bounds["Q_G"][0],
+            "Q_G_max": metric_bounds["Q_G"][1],
+            "Q_S_min": metric_bounds["Q_S"][0],
+            "Q_S_max": metric_bounds["Q_S"][1],
+            "Q_R_min": metric_bounds["Q_R"][0],
+            "Q_R_max": metric_bounds["Q_R"][1],
+            "C_min": metric_bounds["C"][0],
+            "C_max": metric_bounds["C"][1],
             "path_direction_counts": dict(path_counts),
             "position_state_after_counts": dict(position_after_counts),
-            "source_timestamp_first": self._rows[0]["source_timestamp"] if self._rows else None,
-            "source_timestamp_last": self._rows[-1]["source_timestamp"] if self._rows else None,
-            "source_delta_t_seconds_min": min(delta_seconds) if delta_seconds else None,
-            "source_delta_t_seconds_max": max(delta_seconds) if delta_seconds else None,
-            "irregular_source_time_gap_count": sum(1 for x in delta_seconds if abs(x - 60.0) > 1e-9),
-            "adaptation_event_count": len(self._emitter.adaptation_audit),
-            "feedback_event_count": len(self._emitter.feedback_audit),
+            "source_timestamp_first": self._first_source_timestamp,
+            "source_timestamp_last": self._last_source_timestamp,
+            "source_delta_t_seconds_min": metric_bounds["source_delta_t_seconds"][0],
+            "source_delta_t_seconds_max": metric_bounds["source_delta_t_seconds"][1],
+            "irregular_source_time_gap_count": irregular_source_time_gap_count,
+            "adaptation_event_count": self._emitter.adaptation_event_count,
+            "feedback_event_count": self._emitter.feedback_event_count,
             "source_timestamp_preserved": True,
             "timestamp_normalization": False,
             "cadence_logic": "NONE",
@@ -379,50 +476,6 @@ class AdaptivePipeline:
         self.summary_json_path.parent.mkdir(parents=True, exist_ok=True)
         self.summary_json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return summary
-
-    def _write_csv(self) -> None:
-        """Write observations CSV in SADE-owned output directory."""
-        fieldnames = list(self._rows[0].keys()) if self._rows else [
-            "pipeline_observation_number",
-            "source_row_index",
-            "source_timestamp",
-            "entity_id",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-            "physical_row",
-            "status",
-            "observation_id",
-            "emission_id",
-            "source_delta_t_seconds",
-            "decision_rule_path",
-            "H",
-            "Q_G",
-            "Q_S",
-            "Q_R",
-            "C",
-            "path_direction",
-            "terminal_displacement",
-            "strength",
-            "coherence",
-            "persistence",
-            "uncertainty",
-            "reversal_propensity",
-            "position_decision",
-            "position_state_before",
-            "position_state_after",
-            "prior_context_count",
-            "adaptation_event_delta",
-            "feedback_event_delta",
-        ]
-        self.observations_csv_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.observations_csv_path.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in self._rows:
-                writer.writerow(row)
 
     def close(self) -> None:
         """Close pipeline resources."""

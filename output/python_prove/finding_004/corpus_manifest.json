@@ -1,0 +1,13 @@
+{
+  "case_count": 55,
+  "corpus_sha256": "68a94fed1e117486820088be40c7b227170838f6e05e5d6e7b17775cbbde4527",
+  "date": "2026-08-27",
+  "finding_001": "RESOLVED",
+  "finding_002": "RESOLVED",
+  "finding_003": "RESOLVED",
+  "float_representation_policy": "IEEE-754 binary64 hexadecimal strings produced by Python float.hex()",
+  "schema_version": "fit_f4_golden_corpus.v1",
+  "scientific_baseline": "Finding 003 accepted production state",
+  "source": "output\\python_prove\\finding_004\\before\\adaptive\\observations.csv",
+  "source_sha256": "d93f86ae2cdf8bd70d20d5f902f7c1b12ae343ba804a47e4cd6595593e81cd24"
+}

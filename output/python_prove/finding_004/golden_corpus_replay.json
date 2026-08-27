@@ -1,0 +1,14 @@
+{
+  "case_count": 55,
+  "exact_fields": [
+    "means",
+    "scales",
+    "standardized",
+    "physical",
+    "minimum",
+    "maximum",
+    "condition"
+  ],
+  "mismatches": [],
+  "status": "PASS"
+}
