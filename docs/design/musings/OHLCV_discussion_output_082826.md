@@ -267,44 +267,43 @@ Once these decisions are resolved, the dashboard can be specified down to schema
 
 ```mermaid
 flowchart TD
-
-    %% LAYER 1: DATA INGESTION
-    subgraph L1[DATA INGESTION LAYER]
-      A1["Primary Feed: Alpaca SIP<br/>(WebSocket / $99/mo)"]
-      A2["Secondary / Backup Feed:<br/>Databento (Pay-As-You-Go)"]
-
-      CB["Circuit Breaker<br/>& Failover Router"]
-
-      AGG["OHLCV Bar Aggregator<br/>+ REST Gap-Filler"]
-
-        A1 --> CB
-        A2 --> CB
-        CB --> AGG
+    subgraph FEEDS["EXTERNAL MARKET FEEDS"]
+        ALPACA["Alpaca SIP<br/>Primary WebSocket Feed"]
+        DATABENTO["Databento<br/>Fallback and Historical Feed"]
     end
 
-    %% LAYER 2: ANALYTICS & MODEL
-    subgraph L2[ANALYTICS & MODEL LAYER]
-      M1["Adaptive Model Engine<br/>(Signals & Decision Vector)"]
+    subgraph INGESTION["INGESTION AND DATA QUALITY"]
+        FAILOVER["Circuit Breaker<br/>and Failover Router"]
+        BARS["OHLCV Bar Aggregator<br/>and REST Gap-Filler"]
     end
 
-    %% LAYER 3: RISK & OMS GUARDRAILS
-    subgraph L3[RISK & OMS GUARDRAILS]
-      R1["OMS / Risk Guardrails<br/>- Max Position & Order Size<br/>- Leverage & Drawdown Limits<br/>- Latency & Slippage Tolerance"]
+    subgraph DECISION["ANALYTICS AND RISK"]
+        MODEL["Adaptive Model Engine<br/>Signals and Decision Vector"]
+        RISK["OMS and Risk Guardrails"]
     end
 
-    %% LAYER 4: EXECUTION & HARNESS
-    subgraph L4[EXECUTION & HARNESS LAYER]
-      ER["Execution Router &<br/>Benchmarking Engine"]
-
-      PE["Paper Execution<br/>Benchmarking Engine"]
-      LB["Live Broker API<br/>(Alpaca / IBKR)"]
-
-        ER --> PE
-        ER --> LB
+    subgraph EXECUTION["EXECUTION AND HARNESS"]
+        ROUTER["Execution Router"]
+        LIVE["Live Broker Adapter<br/>Alpaca / IBKR"]
+        MODE{"Benchmark Mode<br/>Off / Sampled / Full"}
+        PAPER["Paper Execution Engine<br/>L2 Fill Simulation"]
+        CORRELATE["Benchmark Correlation Engine"]
+        STORE["Benchmark Telemetry Store"]
+        DASH["Harness Benchmark Dashboard<br/>Accessed As Needed"]
     end
 
-    %% TOP-DOWN FLOW
-    AGG --> M1
-    M1 --> R1
-    R1 --> ER
+    ALPACA --> FAILOVER
+    DATABENTO --> FAILOVER
+    FAILOVER --> BARS
+    BARS --> MODEL
+    MODEL --> RISK
+    RISK --> ROUTER
+    ROUTER --> LIVE
+
+    ROUTER -.-> MODE
+    MODE -.->|"Sampled or Full"| PAPER
+    LIVE -.->|"Live execution events"| CORRELATE
+    PAPER -.->|"Simulated execution events"| CORRELATE
+    CORRELATE --> STORE
+    STORE --> DASH
 ```
