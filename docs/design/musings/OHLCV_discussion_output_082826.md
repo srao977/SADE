@@ -4,6 +4,10 @@ This document specifies how SADE integrates external market data feeds into a re
 
 The specification also describes how normalized market data drives the adaptive model engine, passes through OMS and risk guardrails, and reaches the execution harness. Live orders are mirrored into a paper environment for fill, slippage, latency, and PnL variance benchmarking. Cross-cutting operational concerns, phased implementation milestones, and the end-to-end architecture are included to guide delivery and production operation.
 
+**Derived artifact specification:** [E2E SADE Artifacts](../E2E_SADE_ARTIFACTS.md)
+
+This document is the parent architecture and functional basis for the E2E SADE artifact specification. Its integrated architecture, semantic system boundaries, component responsibilities, event-recording decisions, benchmark modes, and telemetry contracts provide the requirements from which the Go artifacts are derived. The child specification refines these requirements into ownership boundaries, Go interfaces, package candidates, gRPC service surfaces, processing semantics, and acceptance criteria; it does not supersede this architecture.
+
 ---
 
 ## 1. System Overview
