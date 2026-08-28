@@ -95,27 +95,48 @@ Data flows top-down from redundant external feeds through normalization and OHLC
 
 ## 5. Execution & Harness Layer
 
-### 5.1 Execution Router & Benchmarking Engine
-- **Purpose:** Route validated orders to paper or live execution  
-- **Responsibilities:**  
-  - Decide routing mode  
-  - Benchmark execution quality  
-  - Log all decisions for audit and research
+### 5.1 Execution Router
+- **Purpose:** Route validated orders to live execution and, according to benchmark mode, to paper execution.
+- **Responsibilities:**
+  - Send every approved live order to the configured broker adapter.
+  - Apply `OFF`, `SAMPLED`, or `FULL` paper-mirroring policy.
+  - Assign stable correlation identifiers without waiting for benchmark processing.
 
-### 5.2 Paper Execution Benchmarking Engine
-- **Purpose:** Simulate fills and PnL  
-- **Responsibilities:**  
-  - Model fills using market data  
-  - Record simulated trades and PnL  
-  - Provide safe environment for testing
-
-### 5.3 Live Broker API (Alpaca / IBKR)
+### 5.2 Live Broker Adapter (Alpaca / IBKR)
 - **Purpose:** Execute real trades  
 - **Responsibilities:**  
   - Translate internal orders to broker API  
   - Handle authentication and rate limits  
-  - Confirm order status  
-  - Stream live positions and PnL
+  - Process acknowledgments, rejections, cancellations, and fills
+  - Publish every order-lifecycle update to the Live Execution Events sink
+
+### 5.3 Live Execution Events Sink
+- **Purpose:** Provide a durable, append-only stream of authoritative broker and order-lifecycle events.
+- **Responsibilities:**
+  - Capture live execution events continuously, regardless of benchmark mode.
+  - Preserve immutable events for independent, idempotent consumers.
+  - Retain correlation IDs, broker IDs, sequence numbers, timestamps, quantities, prices, fees, and status details.
+
+### 5.4 Execution Ledger / Audit Event Store
+- **Purpose:** Build the authoritative execution record from Live Execution Events.
+- **Responsibilities:**
+  - Maintain order, fill, position, cash, fee, and PnL records.
+  - Support broker reconciliation, deterministic replay, and audit retention.
+  - Consume events independently of all benchmark components.
+
+### 5.5 Paper Execution Engine
+- **Purpose:** Simulate fills and PnL for orders selected by benchmark policy.
+- **Responsibilities:**
+  - Model fills using contemporaneous market and L2 order-book data.
+  - Publish simulated execution events with the shared `benchmark_id`.
+  - Operate asynchronously without delaying live execution.
+
+### 5.6 Benchmark Correlation Engine
+- **Purpose:** Compare selected live and simulated execution outcomes.
+- **Responsibilities:**
+  - Consume Live Execution Events and paper execution events independently.
+  - Pair outcomes by `benchmark_id`.
+  - Produce derived fill-rate, latency, slippage, and PnL comparison telemetry.
 
 ---
 
@@ -137,7 +158,11 @@ Data flows top-down from redundant external feeds through normalization and OHLC
   - **Slippage Guardrail:** Rejects orders if bid-ask spread exceeds historical threshold.
 
 ### 6.3 Paper vs. Live Benchmarking Harness
-- **Simultaneous Routing:** Trades are executed live and mirrored in a sandbox benchmark environment with simulated exchange matching (using order book L2 state).
+- **Live Execution:** Approved orders are always routed directly to the live broker adapter when SADE is operating in live mode.
+- **Continuous Event Capture:** All live order-lifecycle events are written to the Live Execution Events sink for ledger, PnL, reconciliation, and audit processing.
+- **Benchmark Modes:** Paper mirroring is configurable as `OFF`, `SAMPLED`, or `FULL`.
+- **Contemporaneous Mirroring:** Orders selected for benchmarking are sent asynchronously to the paper engine at live submission time so the simulation can use the original L2 state.
+- **Non-Blocking Requirement:** Paper execution, benchmark correlation, telemetry storage, and dashboard availability must never delay or reject a live order.
 - **Metrics Tracked:**
   - Fill Rate Comparison (Paper vs. Live)
   - Realized Slippage vs. Modeled Slippage
@@ -213,7 +238,22 @@ The architecture provides enough information to define a v0.1 Harness Benchmark 
 - Leverage and maximum-order-value breaches
 - Broker errors and live/paper divergence alerts
 
-### 8.8 Required Telemetry Contract
+### 8.8 Live Execution Events Contract
+
+Live Execution Events are required operational records, not benchmark-only telemetry. The sink captures order creation, submission, acknowledgment, replacement, cancellation, rejection, expiration, partial-fill, and final-fill events. Each immutable event must include:
+
+- `event_id`, `order_id`, broker order ID, and monotonic sequence number
+- `signal_id`, `decision_id`, and optional `benchmark_id`
+- Account, strategy, symbol, side, order type, time-in-force, price, and quantity
+- Requested, cumulative-filled, remaining, and last-fill quantities
+- Fill price, commission, fees, venue, broker status, and rejection reason
+- Event, exchange, broker, and local receipt timestamps
+- Position and cash effects
+- Feed source and market snapshot reference at submission
+
+The Execution Ledger / Audit Event Store and Benchmark Correlation Engine maintain independent consumer checkpoints. Benchmark failures or backlog must not affect ledger processing or live execution.
+
+### 8.9 Required Benchmark Telemetry Contract
 
 Every signal-to-fill lifecycle requires stable correlation identifiers and structured fields:
 
@@ -232,7 +272,7 @@ Every signal-to-fill lifecycle requires stable correlation identifiers and struc
 - Feed source, data age, and volatility regime
 - Position and PnL snapshots
 
-### 8.9 Outstanding Design Decisions
+### 8.10 Outstanding Design Decisions
 
 The following decisions must be defined before dashboard implementation:
 
@@ -287,6 +327,14 @@ flowchart TD
         LIVE["Live Broker Adapter<br/>Alpaca / IBKR"]
         MODE{"Benchmark Mode<br/>Off / Sampled / Full"}
         PAPER["Paper Execution Engine<br/>L2 Fill Simulation"]
+    end
+
+    subgraph RECORDING["REQUIRED LIVE EVENT RECORDING"]
+        EVENTS[("LIVE EXECUTION EVENTS SINK<br/>Continuous / Durable / Append-Only")]
+        LEDGER["Authoritative Execution Ledger<br/>and Audit Event Store"]
+    end
+
+    subgraph BENCHMARK["OPTIONAL BENCHMARK ANALYSIS"]
         CORRELATE["Benchmark Correlation Engine"]
         STORE["Benchmark Telemetry Store"]
         DASH["Harness Benchmark Dashboard<br/>Accessed As Needed"]
@@ -299,11 +347,15 @@ flowchart TD
     MODEL --> RISK
     RISK --> ROUTER
     ROUTER --> LIVE
+    LIVE --> EVENTS
+    EVENTS --> LEDGER
 
     ROUTER -.-> MODE
     MODE -.->|"Sampled or Full"| PAPER
-    LIVE -.->|"Live execution events"| CORRELATE
+    EVENTS -.->|"Selected live events"| CORRELATE
     PAPER -.->|"Simulated execution events"| CORRELATE
     CORRELATE --> STORE
     STORE --> DASH
+
+    style EVENTS fill:#fff2cc,stroke:#8a6d1d,stroke-width:3px
 ```
