@@ -1,20 +1,21 @@
-# Trading System Architecture Specification
+# SADE External Market Feed Integration Spefication
 
-This document defines the full system architecture for a multi‑feed, risk‑aware trading platform.  
-It includes the complete component descriptions and a Mermaid diagram compatible with GitHub’s Markdown renderer.
+This document specifies how SADE integrates external market data feeds into a resilient, risk-aware trading pipeline. It defines Alpaca SIP as the primary real-time source and Databento as the fallback and historical gap-filling source, with circuit-breaker, heartbeat, reconnection, normalization, and OHLCV aggregation behavior between the feeds and downstream consumers.
+
+The specification also describes how normalized market data drives the adaptive model engine, passes through OMS and risk guardrails, and reaches the execution harness. Live orders are mirrored into a paper environment for fill, slippage, latency, and PnL variance benchmarking. Cross-cutting operational concerns, phased implementation milestones, and the end-to-end architecture are included to guide delivery and production operation.
 
 ---
 
 ## 1. System Overview
 
-The trading system is structured into four vertically stacked layers:
+The integration is structured into four vertically stacked layers:
 
 1. **Data Ingestion Layer**  
 2. **Analytics & Model Layer**  
 3. **Risk & OMS Guardrails**  
 4. **Execution & Harness Layer**
 
-Data flows top‑down: market data enters through multiple feeds, is normalized and aggregated, drives models, passes through risk controls, and finally routes into paper or live execution.
+Data flows top-down from redundant external feeds through normalization and OHLCV bar construction. The resulting continuous series drives model inference, risk-compliant order generation, and simultaneous live and paper execution for ongoing quality comparison.
 
 ---
 
@@ -118,7 +119,136 @@ Data flows top‑down: market data enters through multiple feeds, is normalized 
 
 ---
 
-## 6. Cross‑Cutting Concerns
+## 6. Subsystem Detailed Specifications
+
+### 6.1 Ingestion & Circuit Breaker Component
+- **Heartbeat Monitor:** Sends ping/pong every 1000ms. If 3 consecutive heartbeats fail or latency exceeds 1500ms, triggers failover state.
+- **Auto-Reconnect Loop:** Attempts exponential backoff reconnects to Alpaca (`wss://stream.data.alpaca.markets/v2/sip`).
+- **Gap Filling Procedure:**
+  1. Record timestamp of last valid bar received ($T_{last}$).
+  2. Upon socket re-establishment, request REST bars for $[T_{last}, T_{now}]$.
+  3. Deduplicate and inject missing bars into state vector before resuming model inferences.
+
+### 6.2 Adaptive Model Engine & Risk Guardrails
+- **Signal Engine:** Processes normalized OHLCV arrays to generate actionable buy/sell decision vectors.
+- **Risk Guardrails:**
+  - **Max Order Value:** Hard capped per asset class.
+  - **Leverage Limits:** Restricted based on volatility regime.
+  - **Slippage Guardrail:** Rejects orders if bid-ask spread exceeds historical threshold.
+
+### 6.3 Paper vs. Live Benchmarking Harness
+- **Simultaneous Routing:** Trades are executed live and mirrored in a sandbox benchmark environment with simulated exchange matching (using order book L2 state).
+- **Metrics Tracked:**
+  - Fill Rate Comparison (Paper vs. Live)
+  - Realized Slippage vs. Modeled Slippage
+  - Order Latency (Signal creation to Broker Ack)
+  - PnL Tracking Variance (identifies live market impact)
+
+---
+
+## 7. Implementation Roadmap
+
+| Phase | Duration | Focus Area | Deliverable |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | Week 1-2 | Alpaca Ingestion & REST Gap-Filler | Resilient single-source websocket engine |
+| **Phase 2** | Week 3 | Databento Fallback Integration | Automated Circuit Breaker & Failover Router |
+| **Phase 3** | Week 4-5 | Benchmarking Harness & OMS | Dual paper/live execution pipeline |
+| **Phase 4** | Week 6 | Production Deployment | Live trading with active risk guardrails |
+
+---
+
+## 8. Harness Benchmark Dashboard Specification
+
+The architecture provides enough information to define a v0.1 Harness Benchmark Dashboard. An implementation-ready dashboard additionally requires a formal telemetry contract. The dashboard should consume structured benchmark events or queryable telemetry rather than derive metrics by parsing free-form application logs.
+
+### 8.1 Executive Summary
+- Live and paper order counts
+- Fill-rate comparison
+- Median and p95 broker acknowledgment latency
+- Realized versus modeled slippage
+- Live versus paper PnL variance
+- Active feed and failover status
+
+### 8.2 Execution Comparison
+- Live and paper fills paired by benchmark or order ID
+- Requested quantity, filled quantity, price, and timestamps
+- Partial-fill and rejection rates
+- Unmatched or incomplete order pairs
+
+### 8.3 Slippage Analysis
+- Arrival-price, modeled, and realized slippage
+- Breakdown by symbol, side, order type, volatility regime, and time window
+- Spread and L2 order-book state at submission
+- Threshold violations
+
+### 8.4 Latency Analysis
+- Signal created to risk approval
+- Risk approval to broker submission
+- Submission to broker acknowledgment
+- Acknowledgment to first and final fill
+- Median, p95, and p99 latency trends
+
+### 8.5 PnL and Market Impact
+- Live and paper realized and unrealized PnL
+- Tracking variance:
+
+  $$
+  \Delta PnL = PnL_{\text{live}} - PnL_{\text{paper}}
+  $$
+
+- Price drift after submission
+- Estimated live market impact
+
+### 8.6 Feed and Data Quality
+- Alpaca and Databento health
+- Heartbeat latency and failures
+- Circuit-breaker transitions
+- Reconnect attempts
+- Missing, backfilled, and deduplicated bars
+- Stale-data incidents affecting decisions
+
+### 8.7 Risk and Exceptions
+- Orders rejected or resized by each guardrail
+- Spread and slippage violations
+- Leverage and maximum-order-value breaches
+- Broker errors and live/paper divergence alerts
+
+### 8.8 Required Telemetry Contract
+
+Every signal-to-fill lifecycle requires stable correlation identifiers and structured fields:
+
+- `benchmark_id`
+- `signal_id`
+- `decision_id`
+- `order_id`
+- `live_order_id`
+- `paper_order_id`
+- `symbol`, `side`, `quantity`, and `order_type`
+- Signal, risk, submission, acknowledgment, and fill timestamps
+- Arrival bid, ask, midpoint, and L2 snapshot reference
+- Modeled fill price and slippage
+- Actual live and paper fills
+- Risk decision and rejection reason
+- Feed source, data age, and volatility regime
+- Position and PnL snapshots
+
+### 8.9 Outstanding Design Decisions
+
+The following decisions must be defined before dashboard implementation:
+
+- Paper matching model
+- Benchmark pairing rules
+- Timestamp clock and precision
+- Slippage reference price
+- PnL accounting method
+- Telemetry retention period
+- Alert thresholds
+
+Once these decisions are resolved, the dashboard can be specified down to schemas, calculations, visualizations, and acceptance criteria.
+
+---
+
+## 9. Cross‑Cutting Concerns
 
 ### Logging & Observability
 - Structured logs for feed health, model decisions, risk rejections, execution quality  
@@ -133,7 +263,7 @@ Data flows top‑down: market data enters through multiple feeds, is normalized 
 
 ---
 
-## 7. Mermaid Architecture Diagram
+## 10. Mermaid Architecture Diagram
 
 ```mermaid
 flowchart TD
@@ -177,3 +307,4 @@ flowchart TD
     AGG --> M1
     M1 --> R1
     R1 --> ER
+```
