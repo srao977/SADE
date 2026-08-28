@@ -263,19 +263,19 @@ Once these decisions are resolved, the dashboard can be specified down to schema
 
 ---
 
-## 10. Mermaid Architecture Diagram
+## 10. SADE Integrated Market Feed Architecture Diagram
 
 ```mermaid
 flowchart TD
 
     %% LAYER 1: DATA INGESTION
     subgraph L1[DATA INGESTION LAYER]
-        A1[Primary Feed: Alpaca SIP\n(WebSocket / $99/mo)]
-        A2[Secondary / Backup Feed:\nDatabento (Pay-As-You-Go)]
+      A1["Primary Feed: Alpaca SIP<br/>(WebSocket / $99/mo)"]
+      A2["Secondary / Backup Feed:<br/>Databento (Pay-As-You-Go)"]
 
-        CB[Circuit Breaker\n& Failover Router]
+      CB["Circuit Breaker<br/>& Failover Router"]
 
-        AGG[OHLCV Bar Aggregator\n+ REST Gap-Filler]
+      AGG["OHLCV Bar Aggregator<br/>+ REST Gap-Filler"]
 
         A1 --> CB
         A2 --> CB
@@ -284,20 +284,20 @@ flowchart TD
 
     %% LAYER 2: ANALYTICS & MODEL
     subgraph L2[ANALYTICS & MODEL LAYER]
-        M1[Adaptive Model Engine\n(Signals & Decision Vector)]
+      M1["Adaptive Model Engine<br/>(Signals & Decision Vector)"]
     end
 
     %% LAYER 3: RISK & OMS GUARDRAILS
     subgraph L3[RISK & OMS GUARDRAILS]
-        R1[OMS / Risk Guardrails\n- Max Position & Order Size\n- Leverage & Drawdown Limits\n- Latency & Slippage Tolerance]
+      R1["OMS / Risk Guardrails<br/>- Max Position & Order Size<br/>- Leverage & Drawdown Limits<br/>- Latency & Slippage Tolerance"]
     end
 
     %% LAYER 4: EXECUTION & HARNESS
     subgraph L4[EXECUTION & HARNESS LAYER]
-        ER[Execution Router &\nBenchmarking Engine]
+      ER["Execution Router &<br/>Benchmarking Engine"]
 
-        PE[Paper Execution\nBenchmarking Engine]
-        LB[Live Broker API\n(Alpaca / IBKR)]
+      PE["Paper Execution<br/>Benchmarking Engine"]
+      LB["Live Broker API<br/>(Alpaca / IBKR)"]
 
         ER --> PE
         ER --> LB
